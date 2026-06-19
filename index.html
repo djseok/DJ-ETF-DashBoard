@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 기계적 투자 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f8fafc; }
+        .signal-buy { background-color: #fee2e2; border-left: 6px solid #ef4444; color: #991b1b; }
+        .signal-sell { background-color: #dbeafe; border-left: 6px solid #3b82f6; color: #1e3a8a; }
+        .signal-hold { background-color: #f1f5f9; border-left: 6px solid #64748b; color: #334155; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6 flex items-center">
+            <span class="bg-slate-800 text-white px-3 py-1 rounded-md mr-3">ETF</span> 기계적 투자 시그널 대시보드
+        </h1>
+
+        <div id="setupBox" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <label class="block text-sm font-bold text-slate-700 mb-2">구글 시트 '웹에 게시' CSV 링크를 입력하세요</label>
+            <div class="flex gap-2">
+                <input type="text" id="csvUrl" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+                <button onclick="loadData()" class="bg-blue-600 text-white font-bold px-6 rounded-lg hover:bg-blue-700 whitespace-nowrap">불러오기</button>
+            </div>
+        </div>
+
+        <div id="mainDashboard" class="hidden space-y-6">
+            
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <span class="font-bold text-slate-700">분석할 ETF 선택:</span>
+                <select id="etfSelector" onchange="renderTable()" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[250px]">
+                    </select>
+            </div>
+
+            <div id="signalCard" class="p-6 rounded-xl shadow-sm transition-all duration-300 signal-hold">
+                <div class="text-sm font-bold mb-1 opacity-80">현재 매매 의견</div>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2 id="signalText" class="text-4xl font-extrabold tracking-tight">HOLD (관망)</h2>
+                        <p id="signalDesc" class="mt-2 text-sm">일상적인 노이즈 구간입니다. 기계적으로 관망합니다.</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm opacity-80 mb-1">예상 총 변동 (체력)</div>
+                        <div id="totalChange" class="text-3xl font-black">0.00%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left whitespace-nowrap">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4">종목명</th>
+                                <th class="px-6 py-4">티커</th>
+                                <th class="px-6 py-4 text-right">전일종가</th>
+                                <th class="px-6 py-4 text-right">현재가</th>
+                                <th class="px-6 py-4 text-right">변동률</th>
+                                <th class="px-6 py-4 text-right">비중</th>
+                                <th class="px-6 py-4 text-right font-bold text-slate-900 bg-slate-100">변동 x 비중</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let globalData = {};
+
+        // 페이지 로드 시 저장된 URL이 있으면 자동 실행
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('myEtfCsvUrl');
+            if(savedUrl) {
+                document.getElementById('csvUrl').value = savedUrl;
+                loadData();
+            }
+        };
+
+        function loadData() {
+            const url = document.getElementById('csvUrl').value.trim();
+            if(!url) return alert('링크를 입력해주세요.');
+            
+            localStorage.setItem('myEtfCsvUrl', url); // 브라우저에 링크 저장
+
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processData(results.data);
+                },
+                error: function(err) {
+                    alert('데이터를 불러오지 못했습니다. 링크를 확인해주세요.');
+                }
+            });
+        }
+
+        function processData(rows) {
+            globalData = {};
+            const selector = document.getElementById('etfSelector');
+            selector.innerHTML = '';
+
+            rows.forEach(row => {
+                const etfName = row['ETF이름'];
+                if(!etfName) return;
+
+                if(!globalData[etfName]) {
+                    globalData[etfName] = [];
+                    const option = document.createElement('option');
+                    option.value = etfName;
+                    option.textContent = etfName;
+                    selector.appendChild(option);
+                }
+
+                // 텍스트를 숫자로 변환, 오류 방지
+                const prev = parseFloat(row['전일종가']) || 0;
+                const curr = parseFloat(row['현재가']) || 0;
+                const weight = parseFloat(row['비중(%)']) || 0;
+                
+                // 변동률 계산
+                let changeRate = 0;
+                if(prev > 0) {
+                    changeRate = ((curr - prev) / prev) * 100;
+                }
+
+                // 기여도 계산 (사진의 로직 동일)
+                const contribution = changeRate * (weight / 100);
+
+                globalData[etfName].push({
+                    name: row['종목명'],
+                    ticker: row['티커'],
+                    prev: prev,
+                    curr: curr,
+                    weight: weight,
+                    changeRate: changeRate,
+                    contribution: contribution
+                });
+            });
+
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            renderTable();
+        }
+
+        function renderTable() {
+            const selectedEtf = document.getElementById('etfSelector').value;
+            const data = globalData[selectedEtf] || [];
+            
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            let sumContribution = 0;
+
+            data.forEach(item => {
+                sumContribution += item.contribution;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50";
+
+                // 색상 결정
+                const colorClass = item.changeRate > 0 ? 'text-red-500' : (item.changeRate < 0 ? 'text-blue-500' : 'text-slate-500');
+                const sign = item.changeRate > 0 ? '+' : '';
+                const cSign = item.contribution > 0 ? '+' : '';
+                const cColor = item.contribution > 0 ? 'text-red-600' : (item.contribution < 0 ? 'text-blue-600' : 'text-slate-600');
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-800">${item.name}</td>
+                    <td class="px-6 py-4 text-xs text-slate-500 font-mono">${item.ticker}</td>
+                    <td class="px-6 py-4 text-right text-slate-600">${item.prev.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-right font-bold text-slate-800">${item.curr.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-right font-bold ${colorClass}">${sign}${item.changeRate.toFixed(2)}%</td>
+                    <td class="px-6 py-4 text-right text-slate-600">${item.weight.toFixed(2)}%</td>
+                    <td class="px-6 py-4 text-right font-black bg-slate-50 ${cColor}">${cSign}${item.contribution.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateSignal(sumContribution);
+        }
+
+        function updateSignal(total) {
+            const card = document.getElementById('signalCard');
+            const signalText = document.getElementById('signalText');
+            const signalDesc = document.getElementById('signalDesc');
+            const totalChange = document.getElementById('totalChange');
+
+            const sign = total > 0 ? '+' : '';
+            totalChange.textContent = sign + total.toFixed(2) + '%';
+
+            // 매매 기준 (사진 로직)
+            if (total <= -2.0) {
+                card.className = "p-6 rounded-xl shadow-sm transition-all duration-300 signal-buy";
+                signalText.textContent = "BUY (적극 구매)";
+                signalDesc.textContent = "시장에 공포가 덮쳤습니다. 준비된 현금 총알로 우량 자산을 주워 담을 기회입니다.";
+                totalChange.className = "text-3xl font-black text-red-700";
+            } else if (total >= 3.0) {
+                card.className = "p-6 rounded-xl shadow-sm transition-all duration-300 signal-sell";
+                signalText.textContent = "SELL (분할 판매)";
+                signalDesc.textContent = "시장이 탐욕에 빠졌습니다. 일부 물량을 팔아 수익을 현금으로 확정 짓습니다.";
+                totalChange.className = "text-3xl font-black text-blue-700";
+            } else {
+                card.className = "p-6 rounded-xl shadow-sm transition-all duration-300 signal-hold";
+                signalText.textContent = "HOLD (관망)";
+                signalDesc.textContent = "일상적인 변동 구간입니다. 철저히 시장을 무시하고 자산이 복리로 커지게 둡니다.";
+                totalChange.className = "text-3xl font-black text-slate-700";
+            }
+        }
+    </script>
+</body>
+</html>
