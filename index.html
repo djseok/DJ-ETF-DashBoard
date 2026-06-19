@@ -120,7 +120,7 @@
         // =========================================================================
         // 👇 동진님의 구글 시트 CSV 링크를 반드시 아래 큰따옴표 안에 넣어주세요! 👇
         // =========================================================================
-        const MY_CSV_URL = "여기에_구글시트_CSV_링크를_넣어주세요"; 
+        const MY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv"; 
         
         let globalData = {};
         let thresholds = {}; // 매매 기준치 저장소
@@ -129,7 +129,7 @@
         let macroData = { usdKrw: { change: 0 }, nasdaq: { change: 0 }, vix: { curr: 0 } };
 
         window.onload = function() {
-            if (MY_CSV_URL === "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv") { 
+            if (MY_CSV_URL === "여기에_구글시트_CSV_링크를_넣어주세요") { 
                 alert("코드 안에 구글 시트 CSV 링크를 아직 넣지 않으셨습니다!"); return; 
             }
             loadData(MY_CSV_URL);
