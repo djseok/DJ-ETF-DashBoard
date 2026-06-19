@@ -116,14 +116,12 @@
         const MY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv"; 
         
         let globalData = {};
-        let thresholds = {}; // 매매 기준치 저장소
-        let etfBasePrice = {}; // ETF 본체 기준가 저장소
-        
+        let thresholds = {};
+        let etfBasePrice = {};
         let macroData = { usdKrw: { change: 0 }, nasdaq: { change: 0 }, vix: { curr: 0 } };
 
         window.onload = function() {
-            // 이 안전장치 코드를 원래 상태로 복구했습니다.
-            if (MY_CSV_URL === "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv") { 
+            if (MY_CSV_URL === "여기에_구글시트_CSV_링크를_넣어주세요") { 
                 alert("코드 안에 구글 시트 CSV 링크를 아직 넣지 않으셨습니다!"); return; 
             }
             loadData(MY_CSV_URL);
@@ -149,13 +147,9 @@
                 const curr = parseFloat(row['현재가']) || 0;
                 let changeRate = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
 
-                // 1. 기준(Threshold) 데이터 파싱
                 if (etfName === '기준') { thresholds[row['종목명']] = { buy: prev, sell: curr }; return; }
-                
-                // 2. 본체(Base Price) 데이터 파싱
                 if (etfName === '본체') { etfBasePrice[row['종목명']] = prev; return; }
 
-                // 3. 지표(Macro) 데이터 파싱
                 if (etfName === '지표') {
                     if (row['종목명'] === '환율') {
                         macroData.usdKrw = { curr, change: changeRate };
@@ -171,7 +165,6 @@
                     return; 
                 }
 
-                // 4. 일반 ETF 구성종목 데이터 파싱
                 if(!globalData[etfName]) {
                     globalData[etfName] = [];
                     const option = document.createElement('option');
@@ -223,7 +216,6 @@
             const finalCalculatedChange = (((1 + pureChange/100) * (1 + fxChange/100)) - 1) * 100;
             const currentVix = macroData.vix.curr;
 
-            // 엑셀에서 설정한 매매 기준 가져오기
             const limit = thresholds[etfName] || { buy: -2.0, sell: 3.0 };
             document.getElementById('uiBuyLimit').textContent = limit.buy.toFixed(1) + '%';
             document.getElementById('uiSellLimit').textContent = '+' + limit.sell.toFixed(1) + '%';
@@ -237,7 +229,6 @@
             document.getElementById('fxChangeText').textContent = formatChange(fxChange);
             totalChangeEl.textContent = formatChange(finalCalculatedChange);
 
-            // 매매 의견 로직 산출 (VIX 연동)
             if (finalCalculatedChange <= limit.buy) {
                 if (currentVix >= 25) {
                     card.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-buy-strong relative overflow-hidden";
@@ -262,10 +253,22 @@
                 totalChangeEl.className = "text-4xl font-black text-slate-700 drop-shadow-sm";
             }
 
-            // 보수적 예상 가격 밴드 계산
             const basePrice = etfBasePrice[etfName];
             const rangeEl = document.getElementById('expectedPriceRange');
             const basePriceEl = document.getElementById('basePriceText');
 
             if (basePrice) {
-                const exactExpected = basePrice * (1 + final
+                const exactExpected = basePrice * (1 + finalCalculatedChange / 100);
+                const minExpected = Math.floor(exactExpected * 0.997); 
+                const maxExpected = Math.ceil(exactExpected * 1.003);  
+
+                rangeEl.innerHTML = `<span class="text-blue-600 font-extrabold">₩${minExpected.toLocaleString()}</span> <span class="text-slate-400 mx-1">~</span> <span class="text-red-600 font-extrabold">₩${maxExpected.toLocaleString()}</span>`;
+                basePriceEl.textContent = basePrice.toLocaleString();
+            } else {
+                rangeEl.textContent = "구글 시트에 해당 ETF의 '본체' 데이터가 없습니다.";
+                basePriceEl.textContent = "0";
+            }
+        }
+    </script>
+</body>
+</html>
