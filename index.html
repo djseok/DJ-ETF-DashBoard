@@ -112,7 +112,7 @@
     </div>
 
     <script>
-        // 질문자님의 정상적인 구글 시트 링크가 올바르게 적용되었습니다.
+        // 질문자님의 정상적인 구글 시트 링크
         const MY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv"; 
         
         let globalData = {};
@@ -121,10 +121,10 @@
         let macroData = { usdKrw: { change: 0 }, nasdaq: { change: 0 }, vix: { curr: 0 } };
 
         window.onload = function() {
-            if (MY_CSV_URL === "여기에_구글시트_CSV_링크를_넣어주세요") { 
-                alert("코드 안에 구글 시트 CSV 링크를 아직 넣지 않으셨습니다!"); return; 
-            }
-            loadData(MY_CSV_URL);
+            // 🔥 [캐시 영구 방어 코드] 🔥
+            // 인터넷 주소 뒤에 현재 시간을 강제로 붙여서, 브라우저가 "앗! 새로운 파일이네?" 착각하게 만들어 무조건 최신 데이터를 가져오게 합니다.
+            const noCacheUrl = MY_CSV_URL + "&t=" + new Date().getTime();
+            loadData(noCacheUrl);
         };
 
         function loadData(url) {
