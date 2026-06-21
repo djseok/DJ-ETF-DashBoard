@@ -15,7 +15,6 @@
 
     <div class="max-w-5xl mx-auto space-y-6">
         
-        <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div>
                 <h1 class="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
@@ -31,7 +30,6 @@
             </div>
         </header>
 
-        <!-- MACRO INDICATORS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
                 <div>
@@ -56,7 +54,6 @@
             </div>
         </div>
 
-        <!-- MAIN SIGNAL CARD -->
         <div id="signalCard" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -69,7 +66,6 @@
             <hr class="my-6 border-gray-100">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- MATH ENGINE OUTPUT -->
                 <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col justify-center">
                     <p class="text-xs font-bold text-gray-400 tracking-wider">글로벌 자산 결합 통계적 가이드라인</p>
                     <div class="flex items-baseline gap-2 mt-2">
@@ -79,7 +75,6 @@
                     <p class="text-xs text-gray-400 mt-1 font-mono" id="pureComponentWeight">순수 글로벌 체력 분배 연산값 포함</p>
                 </div>
 
-                <!-- STRUCTURAL LIMIT BANDS -->
                 <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-3">
                     <div>
                         <p class="text-xs font-bold text-gray-400">🎯 보수적 청산/진입 주문 최적화 밴드 (오차범위 ±0.3%)</p>
@@ -92,9 +87,7 @@
                 </div>
             </div>
 
-            <!-- PRO SYSTEM OVERLAY PANELS -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <!-- MICROSTRUCTURAL MATRIX -->
                 <div class="bg-blue-50 bg-opacity-40 p-4 rounded-2xl border border-blue-100">
                     <p class="text-xs font-bold text-blue-700 flex items-center gap-1">🧱 수급 구조적 매물대 커트라인 (Micro Orderbook Boundary)</p>
                     <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
@@ -108,7 +101,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- FUNDAMENTAL MATRIX -->
                 <div class="bg-purple-50 bg-opacity-40 p-4 rounded-2xl border border-purple-100">
                     <p class="text-xs font-bold text-purple-700 flex items-center gap-1">📊 계량 펀더멘털 평가 매트릭스 (Valuation Horizon)</p>
                     <div class="grid grid-cols-3 gap-2 mt-2 text-sm">
@@ -129,7 +121,6 @@
             </div>
         </div>
 
-        <!-- COMPONENTS TABLE -->
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50 bg-opacity-40">
                 <h3 class="font-bold text-sm text-gray-700 flex items-center gap-2">⚙️ 글로벌 하위 공급망 포트폴리오 기여도 연산 매트릭스</h3>
@@ -148,8 +139,7 @@
                         </tr>
                     </thead>
                     <tbody id="componentTableBody" class="divide-y divide-gray-50 text-xs font-medium">
-                        <!-- Dynamic rows inside JS -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -241,22 +231,22 @@
             let components = [];
 
             masterRawData.forEach(row => {
-                if(row[1] !== targetAssetName) return;
+                const rowType = row[0];
                 
-                if(row[0] === '기준') {
+                if (rowType === '기준' && row[1] === targetAssetName) {
                     threshBuy = parseFloat(row[3]);
                     threshSell = parseFloat(row[4]);
-                } else if(row[0] === '수급') {
+                } else if (rowType === '수급' && row[1] === targetAssetName) {
                     supportPrice = parseFloat(row[3]);
                     resistancePrice = parseFloat(row[4]);
-                } else if(row[0] === '가치') {
+                } else if (rowType === '가치' && row[1] === targetAssetName) {
                     valFloor = parseFloat(row[3]);
                     valCeiling = parseFloat(row[4]);
                     valLive = parseFloat(row[5]);
-                } else if(row[0] === '본체') {
+                } else if (rowType === '본체' && row[1] === targetAssetName) {
                     basePrevClose = parseFloat(row[3]);
                     baseLivePrice = parseFloat(row[4]);
-                } else if(row[0] === targetAssetName) {
+                } else if (rowType === targetAssetName) {
                     components.push({
                         name: row[1], ticker: row[2], prev: parseFloat(row[3]), live: parseFloat(row[4]), weight: parseFloat(row[5])
                     });
@@ -280,7 +270,6 @@
             let tableHtml = "";
 
             components.forEach(comp => {
-                // 실시간 데이터 로딩 실패 복구용 제어구조
                 let assetLive = comp.live;
                 if(isNaN(assetLive) || assetLive === 0) {
                     assetLive = comp.prev;
@@ -303,8 +292,6 @@
 
             document.getElementById('componentTableBody').innerHTML = tableHtml;
 
-            // FX 델타 및 VIX 승수 결합
-            // VIX 승수: 시장 공포지수가 고조될 경우 분할 매매 강도를 수학적으로 보정
             let vixMultiplier = 1.0;
             if(globalVixValue >= 25) vixMultiplier = 1.30;
             else if(globalVixValue >= 20) vixMultiplier = 1.15;
@@ -315,13 +302,11 @@
             predElement.className = `text-3xl md:text-4xl font-bold mono ${finalExpectedReturn >= 0 ? 'text-red-500':'text-blue-500'}`;
             document.getElementById('pureComponentWeight').innerText = `순수 공급망 원가 변동률: ${(rawSumDelta*100).toFixed(2)}% (VIX 위험자산 보정계수 ${vixMultiplier}x 변동결합)`;
 
-            // 주문 최적화 가격 밴드 추정 연산 (±0.3% Boundary Filter)
             const theoreticalTargetPrice = basePrevClose * (1 + (finalExpectedReturn / 100));
             const bandLower = Math.round(theoreticalTargetPrice * 0.997);
             const bandUpper = Math.round(theoreticalTargetPrice * 1.003);
             document.getElementById('priceBand').innerText = `₩${bandLower.toLocaleString()} ~ ₩${bandUpper.toLocaleString()}`;
 
-            // 다중 오버레이 시그널 매트릭스 판정구조
             const signalCard = document.getElementById('signalCard');
             const signalTitle = document.getElementById('signalTitle');
             const signalDesc = document.getElementById('signalDesc');
@@ -330,7 +315,6 @@
             if(finalExpectedReturn <= threshBuy) signal = "BUY";
             if(finalExpectedReturn >= threshSell) signal = "SELL";
 
-            // 펀더멘털 및 매물대 지지 기반 조건성 확률 오버레이 분기
             if(signal === "BUY" && baseLivePrice > 0) {
                 if(baseLivePrice <= supportPrice * 1.01 || globalVixValue >= 25) {
                     signal = "STRONG_BUY";
@@ -342,7 +326,6 @@
                 }
             }
 
-            // 시각화 동적 렌더링 파트
             if(signal === "STRONG_BUY") {
                 signalCard.className = "bg-red-500 p-6 md:p-8 rounded-3xl shadow-lg text-white border-none";
                 signalTitle.innerText = "🔥 STRONG BUY (퀀트 최적 타점 진입) 🐕";
@@ -378,7 +361,6 @@
             }
         }
 
-        // 마스터 엔진 구동
         window.onload = initDashboard;
     </script>
 </body>
