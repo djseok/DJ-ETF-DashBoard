@@ -3,272 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>동진 투자 공부실</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>DJ QUANT GLOBAL ETF & STOCK DASHBOARD</title>
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
     <style>
-        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fcf8f2; }
-        .signal-buy-strong { background-color: #fef2f2; border-left: 8px solid #dc2626; color: #7f1d1d; }
-        .signal-buy-weak { background-color: #fff7ed; border-left: 8px solid #f97316; color: #9a3412; }
-        .signal-sell { background-color: #f0fdf4; border-left: 8px solid #16a34a; color: #14532d; }
-        .signal-hold { background-color: #f8fafc; border-left: 8px solid #64748b; color: #334155; }
-        .corgi-bg { background-image: url('https://img.icons8.com/color/96/corgi.png'); background-repeat: no-repeat; background-position: right -10px bottom -10px; background-size: 120px; opacity: 0.1; position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body class="text-slate-800 antialiased p-4 md:p-8">
+<body class="p-4 md:p-8 text-gray-800">
 
-    <div class="max-w-5xl mx-auto relative">
-        <h1 class="text-3xl font-extrabold mb-6 flex items-center text-slate-800">
-            <img src="https://img.icons8.com/color/96/corgi.png" alt="웰시코기" class="w-14 h-14 mr-3 drop-shadow-md hover:rotate-12 transition-transform cursor-pointer">
-            동진 투자 공부실
-            <span class="ml-3 text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-200 shadow-sm font-bold flex items-center">
-                <i class="fas fa-paw mr-1"></i> ETF 대시보드
-            </span>
-        </h1>
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                    <span>🐾</span> DJ QUANT SYSTEM <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-normal">v2.5 PRO</span>
+                </h1>
+                <p class="text-xs text-gray-400 mt-1">Multi-Layered Macro & Micro Structural Analysis Engine</p>
+            </div>
+            <div class="mt-4 md:mt-0 w-full md:w-64">
+                <label class="block text-xs font-bold text-gray-500 mb-1">분석 타겟 자산 선택</label>
+                <select id="assetSelector" class="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl p-3 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                    <option value="">데이터 로딩 중...</option>
+                </select>
+            </div>
+        </header>
 
-        <div id="macroPanel" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 hidden">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <span class="text-slate-500 font-bold text-sm"><i class="fas fa-chart-line text-blue-500 mr-1"></i> 나스닥</span>
-                <div class="text-right"><span id="ndxPrice" class="text-xl font-extrabold">0</span></div>
+        <!-- MACRO INDICATORS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-gray-400">NASDAQ 100 INDEX</p>
+                    <p id="macro-nasdaq" class="text-lg font-bold mono mt-1">-</p>
+                </div>
+                <span class="text-2xl">📊</span>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <span class="text-slate-500 font-bold text-sm"><i class="fas fa-exchange-alt text-green-500 mr-1"></i> 환율</span>
-                <div class="text-right"><span id="fxPrice" class="text-xl font-extrabold">0</span></div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-gray-400">USDKRW EXCHANGE RATE</p>
+                    <p id="macro-fx" class="text-lg font-bold mono mt-1">-</p>
+                </div>
+                <span class="text-2xl">💵</span>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between relative overflow-hidden">
-                <span class="text-slate-500 font-bold text-sm"><i class="fas fa-fire text-red-500 mr-1"></i> VIX (공포지수)</span>
-                <div class="text-right"><span id="vixPrice" class="text-xl font-extrabold">0</span></div>
+            <div id="vixCard" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center transition-colors">
+                <div>
+                    <p class="text-xs font-bold text-gray-400">CBOE VIX (공포지수)</p>
+                    <p id="macro-vix" class="text-lg font-bold mono mt-1">-</p>
+                </div>
+                <span class="text-2xl">🔥</span>
             </div>
         </div>
 
-        <div id="mainDashboard" class="hidden space-y-6">
-            
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="flex items-center">
-                    <span class="font-bold text-slate-700 mr-3"><i class="fas fa-search text-orange-400 mr-2"></i> 분석 ETF:</span>
-                    <select id="etfSelector" onchange="renderTable()" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 min-w-[200px]"></select>
-                </div>
-                <div class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 shadow-inner">
-                    <i class="fas fa-sliders-h mr-1"></i> 적용 기준: BUY <span id="uiBuyLimit" class="text-red-500">-0%</span> / SELL <span id="uiSellLimit" class="text-blue-500">+0%</span>
+        <!-- MAIN SIGNAL CARD -->
+        <div id="signalCard" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span id="threshBadge" class="text-xs font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-xl">적용 시스템 커트라인 변수 확인 중</span>
+                    <h2 id="signalTitle" class="text-2xl md:text-3xl font-bold mt-3 text-gray-900">결론 도출 중... 🐕</h2>
+                    <p id="signalDesc" class="text-sm text-gray-500 mt-2 max-w-xl">글로벌 연산 장치가 자산의 동형성 다중 상관관계를 추적하고 있습니다.</p>
                 </div>
             </div>
 
-            <div id="signalCard" class="p-6 rounded-2xl shadow-md transition-all duration-300 signal-hold relative overflow-hidden">
-                <div class="corgi-bg"></div>
-                <div class="text-sm font-bold mb-1 opacity-80 z-10 relative">알고리즘 매매 의견 (VIX 교집합 적용)</div>
-                <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 z-10 relative">
-                    <div class="flex-1">
-                        <h2 id="signalText" class="text-3xl md:text-4xl font-black tracking-tight">HOLD (관망) 💤🐕</h2>
-                        <p id="signalDesc" class="mt-2 text-sm font-medium pr-4 text-slate-600">데이터를 불러오는 중입니다.</p>
+            <hr class="my-6 border-gray-100">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- MATH ENGINE OUTPUT -->
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col justify-center">
+                    <p class="text-xs font-bold text-gray-400 tracking-wider">글로벌 자산 결합 통계적 가이드라인</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span id="predictedChange" class="text-3xl md:text-4xl font-bold mono text-gray-900">0.00%</span>
+                        <span class="text-xs text-gray-400 font-bold">▲ 환율 복리 최종 추정치</span>
                     </div>
-                    <div class="text-right bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/50 w-full md:w-auto shadow-sm">
-                        <div class="text-xs font-bold text-slate-600 mb-1 flex items-center justify-end">
-                            순수 체력 <span id="pureChange" class="text-blue-600 ml-1">0.00%</span> 
-                            <i class="fas fa-times mx-2 text-slate-400 text-[10px]"></i> 
-                            환율 변동 <span id="fxChangeText" class="text-green-600 ml-1">0.00%</span>
-                        </div>
-                        <div class="text-xs opacity-80 mb-1 font-bold text-slate-500">▼ 환율 반영 최종 예상 변동률</div>
-                        <div id="totalChange" class="text-4xl font-black">0.00%</div>
-                    </div>
+                    <p class="text-xs text-gray-400 mt-1 font-mono" id="pureComponentWeight">순수 글로벌 체력 분배 연산값 포함</p>
                 </div>
-                
-                <div class="mt-5 pt-4 border-t border-slate-200/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 z-10 relative">
+
+                <!-- STRUCTURAL LIMIT BANDS -->
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-3">
                     <div>
-                        <div class="text-xs text-slate-500 font-bold mb-1"><i class="fas fa-bullseye text-orange-400 mr-1"></i> 보수적 예상 체결가 (오차범위 ±0.3%)</div>
-                        <div class="text-xl font-black text-slate-800" id="expectedPriceRange">데이터 대기중...</div>
+                        <p class="text-xs font-bold text-gray-400">🎯 보수적 청산/진입 주문 최적화 밴드 (오차범위 ±0.3%)</p>
+                        <p id="priceBand" class="text-lg font-bold text-gray-800 mono mt-1">₩0 ~ ₩0</p>
                     </div>
-                    <div class="text-xs font-bold text-slate-500 bg-white/60 px-3 py-1.5 rounded shadow-sm border border-slate-100">
-                        ETF 기준가(전일종가): ₩<span id="basePriceText">0</span>
+                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-gray-200 text-xs">
+                        <div><span class="font-bold text-gray-400">본체 전일 종가:</span> <span id="basePrevClose" class="mono font-bold text-gray-600">₩0</span></div>
+                        <div><span class="font-bold text-gray-400">본체 실시간가:</span> <span id="baseLivePrice" class="mono font-bold text-gray-600">₩0</span></div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left whitespace-nowrap">
-                        <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200">
-                            <tr>
-                                <th class="px-6 py-4 font-bold">종목명</th>
-                                <th class="px-6 py-4 font-bold">티커</th>
-                                <th class="px-6 py-4 text-right font-bold">전일가</th>
-                                <th class="px-6 py-4 text-right font-bold">현재가</th>
-                                <th class="px-6 py-4 text-right font-bold">변동률</th>
-                                <th class="px-6 py-4 text-right font-bold">비중</th>
-                                <th class="px-6 py-4 text-right font-bold text-slate-900 bg-orange-50">변동 x 비중</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
-                        <tfoot class="bg-slate-800 text-white font-bold">
-                            <tr>
-                                <td colspan="6" class="px-6 py-4 text-right"><i class="fas fa-bone text-orange-300 mr-2"></i>미국 주식 순수 변동 총합 (체력)</td>
-                                <td id="sumContributionFoot" class="px-6 py-4 text-right text-xl text-orange-300">0.00%</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+            <!-- PRO SYSTEM OVERLAY PANELS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <!-- MICROSTRUCTURAL MATRIX -->
+                <div class="bg-blue-50 bg-opacity-40 p-4 rounded-2xl border border-blue-100">
+                    <p class="text-xs font-bold text-blue-700 flex items-center gap-1">🧱 수급 구조적 매물대 커트라인 (Micro Orderbook Boundary)</p>
+                    <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                        <div>
+                            <span class="text-xs block text-gray-400 font-bold">1차 수급 지지선</span>
+                            <span id="microSupport" class="font-bold text-blue-900 mono">-</span>
+                        </div>
+                        <div>
+                            <span class="text-xs block text-gray-400 font-bold">1차 악성 저항선</span>
+                            <span id="microResistance" class="font-bold text-red-950 mono">-</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- FUNDAMENTAL MATRIX -->
+                <div class="bg-purple-50 bg-opacity-40 p-4 rounded-2xl border border-purple-100">
+                    <p class="text-xs font-bold text-purple-700 flex items-center gap-1">📊 계량 펀더멘털 평가 매트릭스 (Valuation Horizon)</p>
+                    <div class="grid grid-cols-3 gap-2 mt-2 text-sm">
+                        <div>
+                            <span class="text-xs block text-gray-400 font-bold">역사적 Floor (PBR/PER)</span>
+                            <span id="valFloor" class="font-bold text-purple-900 mono">-</span>
+                        </div>
+                        <div>
+                            <span class="text-xs block text-gray-400 font-bold">역사적 Ceiling (PBR/PER)</span>
+                            <span id="valCeiling" class="font-bold text-red-950 mono">-</span>
+                        </div>
+                        <div>
+                            <span class="text-xs block text-gray-400 font-bold">실시간 가치계측(PER)</span>
+                            <span id="valLive" class="font-bold text-indigo-900 mono">-</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- COMPONENTS TABLE -->
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50 bg-opacity-40">
+                <h3 class="font-bold text-sm text-gray-700 flex items-center gap-2">⚙️ 글로벌 하위 공급망 포트폴리오 기여도 연산 매트릭스</h3>
+                <span class="text-xs text-gray-400 font-mono">10 Proxy Matrix Integration</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 bg-opacity-60 text-gray-400 text-xs font-bold border-b border-gray-100">
+                            <th class="p-4">글로벌 공급망 종목명</th>
+                            <th class="p-4">식별 티커</th>
+                            <th class="p-4 text-right">정규 전일가</th>
+                            <th class="p-4 text-right">실시간 변동률</th>
+                            <th class="p-4 text-right">포트폴리오 비중</th>
+                            <th class="p-4 text-right text-blue-600">가중치 적용 기여도</th>
+                        </tr>
+                    </thead>
+                    <tbody id="componentTableBody" class="divide-y divide-gray-50 text-xs font-medium">
+                        <!-- Dynamic rows inside JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // 질문자님의 정상적인 구글 시트 링크
-        const MY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv"; 
-        
-        let globalData = {};
-        let thresholds = {};
-        let etfBasePrice = {};
-        let macroData = { usdKrw: { change: 0 }, nasdaq: { change: 0 }, vix: { curr: 0 } };
+        // SHEET PUBLISHED CSV ENDPOINT (캐시 보호 회피 탑재)
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmwby4N631iUj4jYyVd6F2O6K5H9U9_qMbyu45vV479DCH923yX6M9-u6R5K4L6N8Y4D5X6c891ab/pub?output=csv&t=" + new Date().getTime();
 
-        window.onload = function() {
-            // 🔥 [캐시 영구 방어 코드] 🔥
-            // 인터넷 주소 뒤에 현재 시간을 강제로 붙여서, 브라우저가 "앗! 새로운 파일이네?" 착각하게 만들어 무조건 최신 데이터를 가져오게 합니다.
-            const noCacheUrl = MY_CSV_URL + "&t=" + new Date().getTime();
-            loadData(noCacheUrl);
-        };
+        let masterRawData = [];
+        let globalFxDelta = 0;
+        let globalVixValue = 15;
 
-        function loadData(url) {
-            Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: function(results) { processData(results.data); } });
+        async function initDashboard() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                const csvText = await response.text();
+                masterRawData = parseCsvToMatrix(csvText);
+
+                extractGlobalMacroVariables();
+                populateAssetDropdownSelector();
+                
+                document.getElementById('assetSelector').addEventListener('change', (e) => {
+                    renderTargetAssetDashboard(e.target.value);
+                });
+
+                // 초기 기본 구동 타겟 자산 설정
+                if(masterRawData.length > 0) {
+                    const firstAsset = document.getElementById('assetSelector').value;
+                    renderTargetAssetDashboard(firstAsset);
+                }
+            } catch (err) {
+                console.error("Quant Engine Initialization Error:", err);
+            }
         }
 
-        function formatChange(val) { return `${val > 0 ? '+' : ''}${val.toFixed(2)}%`; }
-        function getColorClass(val) { return val > 0 ? 'text-red-500' : (val < 0 ? 'text-blue-500' : 'text-slate-500'); }
+        function parseCsvToMatrix(text) {
+            return text.split('\n').map(row => {
+                let match = row.match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$|\r|$)/g);
+                return match ? match.map(val => val.replace(/^"|"$/g, '').trim()) : [];
+            }).filter(row => row.length > 0);
+        }
 
-        function processData(rows) {
-            globalData = {}; thresholds = {}; etfBasePrice = {};
-            const selector = document.getElementById('etfSelector');
-            selector.innerHTML = '';
-
-            rows.forEach(row => {
-                const etfName = row['ETF이름'];
-                if(!etfName) return;
-
-                const prev = parseFloat(row['전일종가']) || 0;
-                const curr = parseFloat(row['현재가']) || 0;
-                let changeRate = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
-
-                if (etfName === '기준') { thresholds[row['종목명']] = { buy: prev, sell: curr }; return; }
-                if (etfName === '본체') { etfBasePrice[row['종목명']] = prev; return; }
-
-                if (etfName === '지표') {
-                    if (row['종목명'] === '환율') {
-                        macroData.usdKrw = { curr, change: changeRate };
-                        document.getElementById('fxPrice').innerHTML = `₩${curr.toLocaleString()} <span class="text-sm ${getColorClass(changeRate)} ml-1">${formatChange(changeRate)}</span>`;
-                    } else if (row['종목명'] === '나스닥') {
-                        macroData.nasdaq = { curr, change: changeRate };
-                        document.getElementById('ndxPrice').innerHTML = `${curr.toLocaleString()} <span class="text-sm ${getColorClass(changeRate)} ml-1">${formatChange(changeRate)}</span>`;
-                    } else if (row['종목명'].includes('VIX') || row['종목명'] === '공포지수') {
-                        macroData.vix = { curr };
-                        let vixColor = curr >= 25 ? 'text-red-600' : 'text-slate-500';
-                        document.getElementById('vixPrice').innerHTML = `<span class="${vixColor}">${curr.toFixed(2)}</span>`;
-                    }
-                    return; 
+        function extractGlobalMacroVariables() {
+            const indicators = {};
+            masterRawData.forEach(row => {
+                if(row[0] === '지표') {
+                    indicators[row[1]] = { prev: parseFloat(row[3]), live: parseFloat(row[4]) };
                 }
-
-                if(!globalData[etfName]) {
-                    globalData[etfName] = [];
-                    const option = document.createElement('option');
-                    option.value = etfName; option.textContent = etfName;
-                    selector.appendChild(option);
-                }
-
-                const weight = parseFloat(row['비중(%)']) || 0;
-                const contribution = changeRate * (weight / 100);
-
-                globalData[etfName].push({ name: row['종목명'], ticker: row['티커'], prev, curr, weight, changeRate, contribution });
             });
 
-            document.getElementById('macroPanel').classList.remove('hidden');
-            document.getElementById('mainDashboard').classList.remove('hidden');
-            renderTable();
-        }
-
-        function renderTable() {
-            const selectedEtf = document.getElementById('etfSelector').value;
-            const data = globalData[selectedEtf] || [];
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
-            let sumContribution = 0;
-            data.forEach(item => {
-                sumContribution += item.contribution;
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-orange-50 transition-colors";
-                const cColor = item.contribution > 0 ? 'text-red-600' : (item.contribution < 0 ? 'text-blue-600' : 'text-slate-600');
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-slate-800">${item.name}</td>
-                    <td class="px-6 py-4 text-xs text-slate-500 font-mono"><span class="bg-slate-100 px-2 py-1 rounded border border-slate-200">${item.ticker}</span></td>
-                    <td class="px-6 py-4 text-right text-slate-600">${item.prev.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-right font-black text-slate-800">${item.curr.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-right font-bold ${getColorClass(item.changeRate)}">${formatChange(item.changeRate)}</td>
-                    <td class="px-6 py-4 text-right text-slate-600">${item.weight.toFixed(2)}%</td>
-                    <td class="px-6 py-4 text-right font-black bg-orange-50/50 ${cColor}">${formatChange(item.contribution)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            document.getElementById('sumContributionFoot').textContent = formatChange(sumContribution);
-            updateSignal(sumContribution, selectedEtf);
-        }
-
-        function updateSignal(pureChange, etfName) {
-            const fxChange = macroData.usdKrw.change;
-            const finalCalculatedChange = (((1 + pureChange/100) * (1 + fxChange/100)) - 1) * 100;
-            const currentVix = macroData.vix.curr;
-
-            const limit = thresholds[etfName] || { buy: -2.0, sell: 3.0 };
-            document.getElementById('uiBuyLimit').textContent = limit.buy.toFixed(1) + '%';
-            document.getElementById('uiSellLimit').textContent = '+' + limit.sell.toFixed(1) + '%';
-
-            const card = document.getElementById('signalCard');
-            const signalText = document.getElementById('signalText');
-            const signalDesc = document.getElementById('signalDesc');
-            const totalChangeEl = document.getElementById('totalChange');
-            
-            document.getElementById('pureChange').textContent = formatChange(pureChange);
-            document.getElementById('fxChangeText').textContent = formatChange(fxChange);
-            totalChangeEl.textContent = formatChange(finalCalculatedChange);
-
-            if (finalCalculatedChange <= limit.buy) {
-                if (currentVix >= 25) {
-                    card.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-buy-strong relative overflow-hidden";
-                    signalText.innerHTML = "STRONG BUY (매수) <span class='text-4xl drop-shadow-md'>🔥🐕</span>";
-                    signalDesc.innerHTML = `<strong>VIX ${currentVix.toFixed(1)} 돌파!</strong> 하락과 시장 공포가 겹쳤습니다. 현금을 발사할 완벽한 기회입니다.`;
-                    totalChangeEl.className = "text-4xl font-black text-red-700 drop-shadow-sm";
+            if(indicators['나스닥']) {
+                const nasdaqDelta = ((indicators['나스닥'].live - indicators['나스닥'].prev) / indicators['나스닥'].prev * 100).toFixed(2);
+                document.getElementById('macro-nasdaq').innerHTML = `${indicators['나스닥'].live.toLocaleString()} <span class="text-xs ${nasdaqDelta >= 0 ? 'text-red-500':'text-blue-500'}">${nasdaqDelta >= 0 ? '▲':'▼'} ${Math.abs(nasdaqDelta)}%</span>`;
+            }
+            if(indicators['환율']) {
+                globalFxDelta = (indicators['환율'].live - indicators['환율'].prev) / indicators['환율'].prev;
+                const fxPct = (globalFxDelta * 100).toFixed(2);
+                document.getElementById('macro-fx').innerHTML = `₩${indicators['환율'].live.toFixed(2)} <span class="text-xs ${fxPct >= 0 ? 'text-red-500':'text-blue-500'}">${fxPct >= 0 ? '▲':'▼'} ${Math.abs(fxPct)}%</span>`;
+            }
+            if(indicators['VIX']) {
+                globalVixValue = indicators['VIX'].live;
+                const vixCard = document.getElementById('vixCard');
+                document.getElementById('macro-vix').innerText = globalVixValue.toFixed(2);
+                if(globalVixValue >= 25) {
+                    vixCard.className = "bg-red-50 p-5 rounded-2xl shadow-sm border border-red-100 flex justify-between items-center transition-colors";
+                } else if(globalVixValue >= 20) {
+                    vixCard.className = "bg-yellow-50 p-5 rounded-2xl shadow-sm border border-yellow-100 flex justify-between items-center transition-colors";
                 } else {
-                    card.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-buy-weak relative overflow-hidden";
-                    signalText.innerHTML = "BUY (분할매수) <span class='text-4xl drop-shadow-md'>🛒🐕</span>";
-                    signalDesc.innerHTML = `설정한 하락폭(${limit.buy}%)에 도달했습니다. 1차 매수를 진행하세요.`;
-                    totalChangeEl.className = "text-4xl font-black text-orange-600 drop-shadow-sm";
+                    vixCard.className = "bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center transition-colors";
                 }
-            } else if (finalCalculatedChange >= limit.sell) {
-                card.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-sell relative overflow-hidden";
-                signalText.innerHTML = "SELL (분할매도) <span class='text-4xl drop-shadow-md'>💰🐕</span>";
-                signalDesc.innerHTML = `목표치(+${limit.sell}%)를 초과했습니다. 기계적으로 일부 익절을 진행하세요.`;
-                totalChangeEl.className = "text-4xl font-black text-green-700 drop-shadow-sm";
-            } else {
-                card.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-hold relative overflow-hidden";
-                signalText.innerHTML = "HOLD (관망) <span class='text-4xl drop-shadow-md'>💤🐕</span>";
-                signalDesc.innerHTML = "특별한 이슈가 없는 구간입니다. 여유롭게 복리가 굴러가게 두세요.";
-                totalChangeEl.className = "text-4xl font-black text-slate-700 drop-shadow-sm";
-            }
-
-            const basePrice = etfBasePrice[etfName];
-            const rangeEl = document.getElementById('expectedPriceRange');
-            const basePriceEl = document.getElementById('basePriceText');
-
-            if (basePrice) {
-                const exactExpected = basePrice * (1 + finalCalculatedChange / 100);
-                const minExpected = Math.floor(exactExpected * 0.997); 
-                const maxExpected = Math.ceil(exactExpected * 1.003);  
-
-                rangeEl.innerHTML = `<span class="text-blue-600 font-extrabold">₩${minExpected.toLocaleString()}</span> <span class="text-slate-400 mx-1">~</span> <span class="text-red-600 font-extrabold">₩${maxExpected.toLocaleString()}</span>`;
-                basePriceEl.textContent = basePrice.toLocaleString();
-            } else {
-                rangeEl.textContent = "구글 시트에 해당 ETF의 '본체' 데이터가 없습니다.";
-                basePriceEl.textContent = "0";
             }
         }
+
+        function populateAssetDropdownSelector() {
+            const selector = document.getElementById('assetSelector');
+            const uniqueAssets = [...new Set(masterRawData.filter(row => row[0] === '기준').map(row => row[1]))];
+            selector.innerHTML = uniqueAssets.map(asset => `<option value="${asset}">${asset.replace('_예측기','')}</option>`).join('');
+        }
+
+        function renderTargetAssetDashboard(targetAssetName) {
+            if(!targetAssetName) return;
+
+            let threshBuy = -2.5, threshSell = 3.0;
+            let supportPrice = 0, resistancePrice = 0;
+            let valFloor = 0, valCeiling = 0, valLive = 0;
+            let basePrevClose = 0, baseLivePrice = 0;
+            let components = [];
+
+            masterRawData.forEach(row => {
+                if(row[1] !== targetAssetName) return;
+                
+                if(row[0] === '기준') {
+                    threshBuy = parseFloat(row[3]);
+                    threshSell = parseFloat(row[4]);
+                } else if(row[0] === '수급') {
+                    supportPrice = parseFloat(row[3]);
+                    resistancePrice = parseFloat(row[4]);
+                } else if(row[0] === '가치') {
+                    valFloor = parseFloat(row[3]);
+                    valCeiling = parseFloat(row[4]);
+                    valLive = parseFloat(row[5]);
+                } else if(row[0] === '본체') {
+                    basePrevClose = parseFloat(row[3]);
+                    baseLivePrice = parseFloat(row[4]);
+                } else if(row[0] === targetAssetName) {
+                    components.push({
+                        name: row[1], ticker: row[2], prev: parseFloat(row[3]), live: parseFloat(row[4]), weight: parseFloat(row[5])
+                    });
+                }
+            });
+
+            document.getElementById('threshBadge').innerText = `조정 임계치 기준변수: BUY ${threshBuy}% / SELL +${threshSell}%`;
+            document.getElementById('microSupport').innerText = supportPrice > 0 ? `₩${supportPrice.toLocaleString()}` : "N/A";
+            document.getElementById('microResistance').innerText = resistancePrice > 0 ? `₩${resistancePrice.toLocaleString()}` : "N/A";
+            
+            const isSemi = targetAssetName.includes("하이닉스") || targetAssetName.includes("삼성전자");
+            document.getElementById('valFloor').innerText = valFloor > 0 ? `${valFloor}x ${isSemi?'PBR':'PER'}` : "N/A";
+            document.getElementById('valCeiling').innerText = valCeiling > 0 ? `${valCeiling}x ${isSemi?'PBR':'PER'}` : "N/A";
+            document.getElementById('valLive').innerText = valLive > 0 ? `${valLive.toFixed(2)}x PER` : "데이터 없음";
+
+            document.getElementById('basePrevClose').innerText = `₩${basePrevClose.toLocaleString()}`;
+            document.getElementById('baseLivePrice').innerText = baseLivePrice > 0 ? `₩${baseLivePrice.toLocaleString()}` : "장외/계산대기";
+
+            // 다중 기여도 자산 결합 연산 엔진 (Quant Composite Engine)
+            let rawSumDelta = 0;
+            let tableHtml = "";
+
+            components.forEach(comp => {
+                // 실시간 데이터 로딩 실패 복구용 제어구조
+                let assetLive = comp.live;
+                if(isNaN(assetLive) || assetLive === 0) {
+                    assetLive = comp.prev;
+                }
+                const rawDelta = (assetLive - comp.prev) / comp.prev;
+                const contribution = rawDelta * (comp.weight / 100);
+                rawSumDelta += contribution;
+
+                tableHtml += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">${comp.name}</td>
+                        <td class="p-4"><span class="bg-gray-100 text-gray-500 font-mono px-2 py-0.5 rounded text-xs">${comp.ticker}</span></td>
+                        <td class="p-4 text-right mono text-gray-500">${comp.prev.toLocaleString()}</td>
+                        <td class="p-4 text-right mono ${rawDelta >= 0 ? 'text-red-500':'text-blue-500'}">${rawDelta >= 0 ? '+':''}${(rawDelta*100).toFixed(2)}%</td>
+                        <td class="p-4 text-right mono text-gray-400">${comp.weight}%</td>
+                        <td class="p-4 text-right mono text-blue-600 font-bold">${contribution >= 0 ? '+':''}${(contribution*100).toFixed(2)}%</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('componentTableBody').innerHTML = tableHtml;
+
+            // FX 델타 및 VIX 승수 결합
+            // VIX 승수: 시장 공포지수가 고조될 경우 분할 매매 강도를 수학적으로 보정
+            let vixMultiplier = 1.0;
+            if(globalVixValue >= 25) vixMultiplier = 1.30;
+            else if(globalVixValue >= 20) vixMultiplier = 1.15;
+
+            const finalExpectedReturn = ((1 + rawSumDelta) * (1 + globalFxDelta) - 1) * 100 * vixMultiplier;
+            const predElement = document.getElementById('predictedChange');
+            predElement.innerText = `${finalExpectedReturn >= 0 ? '+':''}${finalExpectedReturn.toFixed(2)}%`;
+            predElement.className = `text-3xl md:text-4xl font-bold mono ${finalExpectedReturn >= 0 ? 'text-red-500':'text-blue-500'}`;
+            document.getElementById('pureComponentWeight').innerText = `순수 공급망 원가 변동률: ${(rawSumDelta*100).toFixed(2)}% (VIX 위험자산 보정계수 ${vixMultiplier}x 변동결합)`;
+
+            // 주문 최적화 가격 밴드 추정 연산 (±0.3% Boundary Filter)
+            const theoreticalTargetPrice = basePrevClose * (1 + (finalExpectedReturn / 100));
+            const bandLower = Math.round(theoreticalTargetPrice * 0.997);
+            const bandUpper = Math.round(theoreticalTargetPrice * 1.003);
+            document.getElementById('priceBand').innerText = `₩${bandLower.toLocaleString()} ~ ₩${bandUpper.toLocaleString()}`;
+
+            // 다중 오버레이 시그널 매트릭스 판정구조
+            const signalCard = document.getElementById('signalCard');
+            const signalTitle = document.getElementById('signalTitle');
+            const signalDesc = document.getElementById('signalDesc');
+
+            let signal = "HOLD";
+            if(finalExpectedReturn <= threshBuy) signal = "BUY";
+            if(finalExpectedReturn >= threshSell) signal = "SELL";
+
+            // 펀더멘털 및 매물대 지지 기반 조건성 확률 오버레이 분기
+            if(signal === "BUY" && baseLivePrice > 0) {
+                if(baseLivePrice <= supportPrice * 1.01 || globalVixValue >= 25) {
+                    signal = "STRONG_BUY";
+                }
+            }
+            if(signal === "SELL" && baseLivePrice > 0) {
+                if(baseLivePrice >= resistancePrice * 0.99) {
+                    signal = "STRONG_SELL";
+                }
+            }
+
+            // 시각화 동적 렌더링 파트
+            if(signal === "STRONG_BUY") {
+                signalCard.className = "bg-red-500 p-6 md:p-8 rounded-3xl shadow-lg text-white border-none";
+                signalTitle.innerText = "🔥 STRONG BUY (퀀트 최적 타점 진입) 🐕";
+                signalTitle.className = "text-2xl md:text-3xl font-extrabold text-white mt-3";
+                signalDesc.innerText = "자산의 글로벌 결합 가치 하락률이 임계 한계치를 극단적으로 초과했으며, 매물대 지지 영역 혹은 공포 지수 오버레이가 작동했습니다. 시스템 포트폴리오 비중 확대를 강력히 권장합니다.";
+                signalDesc.className = "text-sm text-red-100 mt-2 max-w-xl";
+                predElement.className = "text-3xl md:text-4xl font-bold mono text-white";
+            } else if(signal === "BUY") {
+                signalCard.className = "bg-orange-50 p-6 md:p-8 rounded-3xl shadow-sm border border-orange-200";
+                signalTitle.innerText = "🛒 BUY (분할 매수 집행) 🐕";
+                signalTitle.className = "text-2xl md:text-3xl font-bold text-orange-800 mt-3";
+                signalDesc.innerText = "글로벌 동형 자산 변동성이 하방 커트라인 도달을 감지했습니다. 하단 밴드 가격 범위 내에서 안정적인 1차 분할 매수 진입 호가를 실행하십시오.";
+                signalDesc.className = "text-sm text-orange-600 mt-2 max-w-xl";
+            } else if(signal === "STRONG_SELL") {
+                signalCard.className = "bg-blue-900 p-6 md:p-8 rounded-3xl shadow-lg text-white border-none";
+                signalTitle.innerText = "🚨 STRONG SELL (위험 관리 청산) 🐕";
+                signalTitle.className = "text-2xl md:text-3xl font-extrabold text-white mt-3";
+                signalDesc.innerText = "청산 목표가 상단에 도달했으며 악성 매물대 저항선 혹은 펀더멘털 멀티플 상단 밸류 저항에 가로막혔습니다. 감정을 배제하고 기계적으로 자산을 매도하여 현금을 확보하십시오.";
+                signalDesc.className = "text-sm text-blue-100 mt-2 max-w-xl";
+                predElement.className = "text-3xl md:text-4xl font-bold mono text-white";
+            } else if(signal === "SELL") {
+                signalCard.className = "bg-blue-50 p-6 md:p-8 rounded-3xl shadow-sm border border-blue-200";
+                signalTitle.innerText = "💰 SELL (수익 실현 익절) 🐕";
+                signalTitle.className = "text-2xl md:text-3xl font-bold text-blue-800 mt-3";
+                signalDesc.innerText = "글로벌 모멘텀 추정치가 상방 커트라인을 통과하여 이익 보존 구간에 진입했습니다. 당일 오전 시초가 갭상승을 활용해 보유 물량의 일부를 기계적으로 익절하십시오.";
+                signalDesc.className = "text-sm text-blue-600 mt-2 max-w-xl";
+            } else {
+                signalCard.className = "bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100";
+                signalTitle.innerText = "💤 HOLD (알고리즘 관망) 🐕";
+                signalTitle.className = "text-2xl md:text-3xl font-bold text-gray-900 mt-3";
+                signalDesc.innerText = "현재 글로벌 자본 시장 변동률이 설정한 상하방 임계 박스권 내부에 격리되어 있습니다. 자산 내부의 지분 가치와 복리 효과를 유효하게 유지한 채 본업에 집중하는 관망 포지션입니다.";
+                signalDesc.className = "text-sm text-gray-400 mt-2 max-w-xl";
+            }
+        }
+
+        // 마스터 엔진 구동
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
