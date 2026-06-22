@@ -22,7 +22,6 @@
         body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #fcf8f2; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* 시그널 테마 색상 (구버전 감성 유지 + STRONG 딥블루 추가) */
         .signal-buy-strong { background-color: #fef2f2; border-left: 8px solid #dc2626; color: #7f1d1d; }
         .signal-buy-weak { background-color: #fff7ed; border-left: 8px solid #f97316; color: #9a3412; }
         .signal-sell-strong { background-color: #eff6ff; border-left: 8px solid #1d4ed8; color: #1e3a8a; }
@@ -113,7 +112,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="expertMatrixPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                     <p class="text-sm font-extrabold text-blue-800 mb-3 flex items-center"><i class="fas fa-layer-group mr-2"></i>구조적 매물대 커트라인</p>
                     <div class="grid grid-cols-2 gap-4">
@@ -170,7 +169,6 @@
     </div>
 
     <script>
-        // v3.0 데이터 처리 엔진 + 구버전 Corgi UI
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv&t=" + new Date().getTime();
 
         let masterRawData = [];
@@ -275,10 +273,17 @@
                 }
             });
 
-            // UI 텍스트 업데이트
             document.getElementById('threshBuyUI').innerText = `${threshBuy}%`;
             document.getElementById('threshSellUI').innerText = `+${threshSell}%`;
             
+            // 🚨 ETF일 때 매물대/가치 패널 자동 숨김 로직
+            const matrixPanel = document.getElementById('expertMatrixPanel');
+            if(supportPrice === 0 && valFloor === 0) {
+                matrixPanel.style.display = 'none';
+            } else {
+                matrixPanel.style.display = 'grid';
+            }
+
             document.getElementById('microSupport').innerText = supportPrice > 0 ? `₩${supportPrice.toLocaleString()}` : "N/A";
             document.getElementById('microResistance').innerText = resistancePrice > 0 ? `₩${resistancePrice.toLocaleString()}` : "N/A";
             
@@ -290,7 +295,6 @@
             document.getElementById('basePrevClose').innerText = basePrevClose > 0 ? `₩${basePrevClose.toLocaleString()}` : "0";
             document.getElementById('baseLivePrice').innerText = baseLivePrice > 0 ? `₩${baseLivePrice.toLocaleString()}` : "0";
 
-            // 매트릭스 계산 & 테이블 렌더링
             let rawSumDelta = 0;
             let tableHtml = "";
 
@@ -314,7 +318,6 @@
             });
             document.getElementById('componentTableBody').innerHTML = tableHtml;
 
-            // 최종 변동률 연산 (수학 공식 표시부)
             let vixMultiplier = 1.0;
             if(!isNaN(globalVixValue)) {
                 if(globalVixValue >= 25) vixMultiplier = 1.30;
@@ -333,7 +336,6 @@
             predElement.innerText = `${finalExpectedReturn >= 0 ? '+':''}${finalExpectedReturn.toFixed(2)}%`;
             predElement.className = `text-4xl font-black mono drop-shadow-sm ${finalExpectedReturn >= 0 ? 'text-red-600':'text-blue-600'}`;
 
-            // 가격 밴드
             if(basePrevClose > 0) {
                 const theoreticalTargetPrice = basePrevClose * (1 + (finalExpectedReturn / 100));
                 const bandLower = Math.round(theoreticalTargetPrice * 0.997);
@@ -343,7 +345,6 @@
                 document.getElementById('priceBand').innerText = "데이터 없음";
             }
 
-            // 시그널 결정 (Corgi 테마 적용)
             const signalCard = document.getElementById('signalCard');
             const signalTitle = document.getElementById('signalTitle');
             const signalDesc = document.getElementById('signalDesc');
