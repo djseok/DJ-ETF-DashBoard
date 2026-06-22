@@ -147,7 +147,6 @@
     </div>
 
     <script>
-        // 질문자님의 진짜 구글 시트 연결 주소로 수정 완료!
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv&t=" + new Date().getTime();
 
         let masterRawData = [];
@@ -201,15 +200,19 @@
                 document.getElementById('macro-fx').innerHTML = `₩${indicators['환율'].live.toFixed(2)} <span class="text-xs ${fxPct >= 0 ? 'text-red-500':'text-blue-500'}">${fxPct >= 0 ? '▲':'▼'} ${Math.abs(fxPct)}%</span>`;
             }
             if(indicators['VIX']) {
-                globalVixValue = indicators['VIX'].live;
+                globalVixValue = parseFloat(indicators['VIX'].live);
                 const vixCard = document.getElementById('vixCard');
-                document.getElementById('macro-vix').innerText = globalVixValue.toFixed(2);
-                if(globalVixValue >= 25) {
-                    vixCard.className = "bg-red-50 p-5 rounded-2xl shadow-sm border border-red-100 flex justify-between items-center transition-colors";
-                } else if(globalVixValue >= 20) {
-                    vixCard.className = "bg-yellow-50 p-5 rounded-2xl shadow-sm border border-yellow-100 flex justify-between items-center transition-colors";
+                if(!isNaN(globalVixValue)) {
+                    document.getElementById('macro-vix').innerText = globalVixValue.toFixed(2);
+                    if(globalVixValue >= 25) {
+                        vixCard.className = "bg-red-50 p-5 rounded-2xl shadow-sm border border-red-100 flex justify-between items-center transition-colors";
+                    } else if(globalVixValue >= 20) {
+                        vixCard.className = "bg-yellow-50 p-5 rounded-2xl shadow-sm border border-yellow-100 flex justify-between items-center transition-colors";
+                    } else {
+                        vixCard.className = "bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center transition-colors";
+                    }
                 } else {
-                    vixCard.className = "bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center transition-colors";
+                    document.getElementById('macro-vix').innerText = "장외/인식대기";
                 }
             }
         }
@@ -294,10 +297,11 @@
             document.getElementById('componentTableBody').innerHTML = tableHtml;
 
             let vixMultiplier = 1.0;
-            if(globalVixValue >= 25) vixMultiplier = 1.30;
-            else if(globalVixValue >= 20) vixMultiplier = 1.15;
+            if(!isNaN(globalVixValue)) {
+                if(globalVixValue >= 25) vixMultiplier = 1.30;
+                else if(globalVixValue >= 20) vixMultiplier = 1.15;
+            }
 
-            // 핵심 베타 연산 적용
             const adjustedSumDelta = rawSumDelta * assetBeta;
             const finalExpectedReturn = ((1 + adjustedSumDelta) * (1 + globalFxDelta) - 1) * 100 * vixMultiplier;
             
@@ -305,7 +309,6 @@
             predElement.innerText = `${finalExpectedReturn >= 0 ? '+':''}${finalExpectedReturn.toFixed(2)}%`;
             predElement.className = `text-3xl md:text-4xl font-bold mono ${finalExpectedReturn >= 0 ? 'text-red-500':'text-blue-500'}`;
             
-            // UI에 베타 수치 표시
             document.getElementById('pureComponentWeight').innerHTML = `<span class="text-gray-400">순수원가변동:</span> ${(rawSumDelta*100).toFixed(2)}% &nbsp;|&nbsp; <span class="text-blue-500 font-bold">고유 체급(β): ${assetBeta}x 곱산</span> &nbsp;|&nbsp; <span class="text-red-400">VIX보정: ${vixMultiplier}x</span>`;
 
             const theoreticalTargetPrice = basePrevClose * (1 + (finalExpectedReturn / 100));
@@ -321,13 +324,14 @@
             if(finalExpectedReturn <= threshBuy) signal = "BUY";
             if(finalExpectedReturn >= threshSell) signal = "SELL";
 
+            // 조건문 버그 철저 격리 (매물대 데이터가 존재할 때만 STRONG 확장 허용)
             if(signal === "BUY" && baseLivePrice > 0) {
-                if(baseLivePrice <= supportPrice * 1.01 || globalVixValue >= 25) {
+                if((supportPrice > 0 && baseLivePrice <= supportPrice * 1.01) || (!isNaN(globalVixValue) && globalVixValue >= 25)) {
                     signal = "STRONG_BUY";
                 }
             }
             if(signal === "SELL" && baseLivePrice > 0) {
-                if(baseLivePrice >= resistancePrice * 0.99) {
+                if(resistancePrice > 0 && baseLivePrice >= resistancePrice * 0.99) {
                     signal = "STRONG_SELL";
                 }
             }
