@@ -175,6 +175,14 @@
         let globalFxDelta = 0;
         let globalVixValue = 15;
 
+        // 🔥 통화기호(₩,$) 및 쉼표(,) 포맷팅을 강제 제거하고 정밀 파싱하는 핵심 가드 함수
+        function cleanAndParseFloat(val) {
+            if (!val) return 0;
+            let clean = val.toString().replace(/,/g, '').replace(/[₩$]/g, '').trim();
+            let num = parseFloat(clean);
+            return isNaN(num) ? 0 : num;
+        }
+
         async function initDashboard() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -208,23 +216,27 @@
             const indicators = {};
             masterRawData.forEach(row => {
                 if(row[0] === '지표') {
-                    indicators[row[1]] = { prev: parseFloat(row[3]), live: parseFloat(row[4]) };
+                    indicators[row[1]] = { prev: cleanAndParseFloat(row[3]), live: cleanAndParseFloat(row[4]) };
                 }
             });
 
             if(indicators['나스닥']) {
-                const nasdaqDelta = ((indicators['나스닥'].live - indicators['나스닥'].prev) / indicators['나스닥'].prev * 100).toFixed(2);
-                document.getElementById('macro-nasdaq').innerHTML = `${indicators['나스닥'].live.toLocaleString()} <span class="text-sm ${nasdaqDelta >= 0 ? 'text-red-500':'text-blue-500'} ml-1">${nasdaqDelta >= 0 ? '▲':'▼'} ${Math.abs(nasdaqDelta)}%</span>`;
+                let p = indicators['나스닥'].prev;
+                let l = indicators['나스닥'].live;
+                const nasdaqDelta = p > 0 ? ((l - p) / p * 100).toFixed(2) : "0.00";
+                document.getElementById('macro-nasdaq').innerHTML = `${l.toLocaleString()} <span class="text-sm ${nasdaqDelta >= 0 ? 'text-red-500':'text-blue-500'} ml-1">${nasdaqDelta >= 0 ? '▲':'▼'} ${Math.abs(nasdaqDelta)}%</span>`;
             }
             if(indicators['환율']) {
-                globalFxDelta = (indicators['환율'].live - indicators['환율'].prev) / indicators['환율'].prev;
+                let p = indicators['환율'].prev;
+                let l = indicators['환율'].live;
+                globalFxDelta = p > 0 ? (l - p) / p : 0;
                 const fxPct = (globalFxDelta * 100).toFixed(2);
-                document.getElementById('macro-fx').innerHTML = `₩${indicators['환율'].live.toFixed(2)} <span class="text-sm ${fxPct >= 0 ? 'text-red-500':'text-blue-500'} ml-1">${fxPct >= 0 ? '▲':'▼'} ${Math.abs(fxPct)}%</span>`;
+                document.getElementById('macro-fx').innerHTML = `₩${l.toFixed(2)} <span class="text-sm ${fxPct >= 0 ? 'text-red-500':'text-blue-500'} ml-1">${fxPct >= 0 ? '▲':'▼'} ${Math.abs(fxPct)}%</span>`;
             }
             if(indicators['VIX']) {
-                globalVixValue = parseFloat(indicators['VIX'].live);
+                globalVixValue = indicators['VIX'].live;
                 const vixCard = document.getElementById('vixCard');
-                if(!isNaN(globalVixValue)) {
+                if(!isNaN(globalVixValue) && globalVixValue > 0) {
                     document.getElementById('macro-vix').innerText = globalVixValue.toFixed(2);
                     if(globalVixValue >= 25) {
                         vixCard.className = "bg-red-50 p-5 rounded-2xl shadow-sm border border-red-200 flex items-center justify-between transition-colors";
@@ -236,6 +248,9 @@
                         vixCard.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between transition-colors";
                         document.getElementById('macro-vix').className = "text-xl font-extrabold mono text-slate-800";
                     }
+                } else {
+                    document.getElementById('macro-vix').innerText = "15.00";
+                    globalVixValue = 15;
                 }
             }
         }
@@ -259,24 +274,23 @@
             masterRawData.forEach(row => {
                 const rowType = row[0];
                 if (rowType === '기준' && row[1] === targetAssetName) {
-                    threshBuy = parseFloat(row[3]); threshSell = parseFloat(row[4]);
+                    threshBuy = cleanAndParseFloat(row[3]); threshSell = cleanAndParseFloat(row[4]);
                 } else if (rowType === '수급' && row[1] === targetAssetName) {
-                    supportPrice = parseFloat(row[3]); resistancePrice = parseFloat(row[4]);
+                    supportPrice = cleanAndParseFloat(row[3]); resistancePrice = cleanAndParseFloat(row[4]);
                 } else if (rowType === '가치' && row[1] === targetAssetName) {
-                    valFloor = parseFloat(row[3]); valCeiling = parseFloat(row[4]); valLive = parseFloat(row[5]);
+                    valFloor = cleanAndParseFloat(row[3]); valCeiling = cleanAndParseFloat(row[4]); valLive = cleanAndParseFloat(row[5]);
                 } else if (rowType === '베타' && row[1] === targetAssetName) {
-                    assetBeta = parseFloat(row[3]);
+                    assetBeta = cleanAndParseFloat(row[3]);
                 } else if (rowType === '본체' && row[1] === targetAssetName) {
-                    basePrevClose = parseFloat(row[3]); baseLivePrice = parseFloat(row[4]);
+                    basePrevClose = cleanAndParseFloat(row[3]); baseLivePrice = cleanAndParseFloat(row[4]);
                 } else if (rowType === targetAssetName) {
-                    components.push({ name: row[1], ticker: row[2], prev: parseFloat(row[3]), live: parseFloat(row[4]), weight: parseFloat(row[5]) });
+                    components.push({ name: row[1], ticker: row[2], prev: cleanAndParseFloat(row[3]), live: cleanAndParseFloat(row[4]), weight: cleanAndParseFloat(row[5]) });
                 }
             });
 
             document.getElementById('threshBuyUI').innerText = `${threshBuy}%`;
             document.getElementById('threshSellUI').innerText = `+${threshSell}%`;
             
-            // 🚨 ETF일 때 매물대/가치 패널 자동 숨김 로직
             const matrixPanel = document.getElementById('expertMatrixPanel');
             if(supportPrice === 0 && valFloor === 0) {
                 matrixPanel.style.display = 'none';
@@ -300,8 +314,8 @@
 
             components.forEach(comp => {
                 let assetLive = comp.live;
-                if(isNaN(assetLive) || assetLive === 0) assetLive = comp.prev;
-                const rawDelta = (assetLive - comp.prev) / comp.prev;
+                if(assetLive === 0) assetLive = comp.prev;
+                const rawDelta = comp.prev > 0 ? (assetLive - comp.prev) / comp.prev : 0;
                 const contribution = rawDelta * (comp.weight / 100);
                 rawSumDelta += contribution;
 
@@ -309,10 +323,10 @@
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-800">${comp.name}</td>
                         <td class="px-6 py-4 text-xs font-mono"><span class="bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">${comp.ticker}</span></td>
-                        <td class="px-6 py-4 text-right mono text-slate-500">${comp.prev.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-right mono text-slate-500">${comp.prev > 0 ? comp.prev.toLocaleString() : '-'}</td>
                         <td class="px-6 py-4 text-right mono font-bold ${rawDelta >= 0 ? 'text-red-500':'text-blue-500'}">${rawDelta >= 0 ? '+':''}${(rawDelta*100).toFixed(2)}%</td>
                         <td class="px-6 py-4 text-right mono text-slate-400">${comp.weight}%</td>
-                        <td class="px-6 py-4 text-right mono font-black bg-orange-50/50 ${contribution >= 0 ? 'text-red-600':'text-blue-600'}">${contribution >= 0 ? '+':''}${(contribution*100).toFixed(2)}%</td>
+                        <td class="px-6 py-4 text-right mono font-black bg-orange-50/30 ${contribution >= 0 ? 'text-red-600':'text-blue-600'}">${contribution >= 0 ? '+':''}${(contribution*100).toFixed(2)}%</td>
                     </tr>
                 `;
             });
