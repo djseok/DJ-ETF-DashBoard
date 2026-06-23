@@ -18,16 +18,13 @@
             src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
             font-weight: 700; font-style: normal;
         }
-        
         body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #fcf8f2; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        
         .signal-buy-strong { background-color: #fef2f2; border-left: 8px solid #dc2626; color: #7f1d1d; }
         .signal-buy-weak { background-color: #fff7ed; border-left: 8px solid #f97316; color: #9a3412; }
         .signal-sell-strong { background-color: #eff6ff; border-left: 8px solid #1d4ed8; color: #1e3a8a; }
         .signal-sell-weak { background-color: #f0fdf4; border-left: 8px solid #16a34a; color: #14532d; }
         .signal-hold { background-color: #f8fafc; border-left: 8px solid #64748b; color: #334155; }
-        
         .corgi-bg { background-image: url('https://img.icons8.com/color/96/corgi.png'); background-repeat: no-repeat; background-position: right -10px bottom -10px; background-size: 120px; opacity: 0.1; position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
     </style>
 </head>
@@ -38,13 +35,14 @@
             <img src="https://img.icons8.com/color/96/corgi.png" alt="웰시코기" class="w-14 h-14 mr-3 drop-shadow-md hover:rotate-12 transition-transform cursor-pointer">
             동진 투자 공부실
             <span class="ml-3 text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-200 shadow-sm font-bold flex items-center">
-                <i class="fas fa-paw mr-1"></i> v4.0 QUANT
+                <i class="fas fa-paw mr-1"></i> v4.5 ENGINE
             </span>
         </h1>
 
         <div class="flex gap-2 mb-6">
             <button id="btnTabQuant" onclick="switchTab('quant')" class="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all">📊 퀀트 예측 엔진</button>
             <button id="btnTabPort" onclick="switchTab('port')" class="flex-1 py-3 bg-white text-slate-600 rounded-xl font-bold shadow-sm border border-slate-200 transition-all hover:bg-orange-50">🏆 코기 클럽 현황판</button>
+            <button id="btnTabCalc" onclick="switchTab('calc')" class="flex-1 py-3 bg-white text-slate-600 rounded-xl font-bold shadow-sm border border-slate-200 transition-all hover:bg-orange-50">🧮 내 주식구매 계산기</button>
         </div>
 
         <div id="viewQuant" class="space-y-6 block">
@@ -55,7 +53,7 @@
                 </div>
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <span class="text-slate-500 font-bold text-sm"><i class="fas fa-exchange-alt text-green-500 mr-1"></i> 환율</span>
-                    <div class="text-right" id="macro-fx"><span class="text-xl font-extrabold mono">-</span></div>
+                    <div class="text-right" id="macro-fx"><span class="text-xl font-extrabold mono">₩-</span></div>
                 </div>
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <span class="text-slate-500 font-bold text-sm"><i class="fas fa-fire text-red-500 mr-1"></i> VIX (공포지수)</span>
@@ -93,7 +91,6 @@
                         </div>
                         <div class="text-xs opacity-80 mb-1 font-bold text-slate-500">▼ 최종 예상 변동률 (복리)</div>
                         <div id="predictedChange" class="text-4xl font-black mono">0.00%</div>
-                        
                         <div class="mt-2 pt-2 border-t border-slate-200/60 space-y-0.5 text-right">
                             <div id="predictedPrice" class="text-sm font-bold text-slate-700 mono">오늘 예상가: ₩0</div>
                             <div id="currentLivePrice" class="text-xs font-semibold text-slate-500 mono">실시간 현재가: ₩0</div>
@@ -145,37 +142,74 @@
                     <div class="text-sm font-bold text-slate-500">데이터를 불러오는 중입니다...</div>
                 </div>
             </div>
-
             <h3 class="text-lg font-extrabold text-slate-800 mt-8 mb-4 px-2 flex items-center"><i class="fas fa-wallet text-slate-400 mr-2"></i> 멤버별 상세 자산 흐름</h3>
             <div id="personalCardsContainer" class="space-y-6"></div>
         </div>
+
+        <div id="viewCalc" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <h2 class="text-xl font-black text-slate-800 flex items-center"><i class="fas fa-calculator text-orange-500 mr-2"></i> 스마트 리밸런싱 시뮬레이터</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-500 mb-1">🚀 대상 멤버 선택</label>
+                        <select id="calcUserSelector" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-500 mb-1">💰 이번 달 총 투자가능 현금 (원)</label>
+                        <input type="number" id="inputCash" value="500000" step="50000" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500 font-mono" placeholder="금액을 입력하세요">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700"><i class="fas fa-shopping-basket mr-1 text-orange-400"></i> 투자 장바구니 결과 (자동 계산 모델)</h3>
+                    <span class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded shadow-inner" id="calcSummaryTotal">총 자산 관리연동 중</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left whitespace-nowrap">
+                        <thead class="text-xs text-slate-400 font-bold bg-slate-50 uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4">추천 투자 종목</th>
+                                <th class="px-6 py-4 text-right">목표 비중</th>
+                                <th class="px-6 py-4 text-right">실시간 현재가</th>
+                                <th class="px-6 py-4 text-right text-orange-600 bg-orange-50/50">매수 타겟 금액</th>
+                                <th class="px-6 py-4 text-right font-bold text-blue-600">추천 매수 수량</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calcTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <tr><td colspan="5" class="p-6 text-center text-slate-400 font-bold">멤버 데이터를 동기화 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        const QUANT_CSV_URL = "https://docs.google.com/spreadsheets/d/1r91WUqYvIfQ1jrehEKiBPUbO7a0iH7iIl3tgNsZoKRc/edit?usp=sharing" ? "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv&t=" + new Date().getTime() : "";
+        const QUANT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?output=csv&t=" + new Date().getTime();
         const PORTFOLIO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?gid=539824393&single=true&output=csv";
 
         let masterRawData = [];
         let globalFxDelta = 0;
         let globalVixValue = 15;
+        let globalUserGroupedData = {}; // 계산기용 글로벌 캐시 메모리
 
         function switchTab(tabName) {
-            const btnQuant = document.getElementById('btnTabQuant');
-            const btnPort = document.getElementById('btnTabPort');
-            const viewQuant = document.getElementById('viewQuant');
-            const viewPort = document.getElementById('viewPort');
+            const tabs = ['Quant', 'Port', 'Calc'];
+            tabs.forEach(t => {
+                document.getElementById('view' + t).classList.add('hidden');
+                document.getElementById('btnTab' + t).className = "flex-1 py-3 bg-white text-slate-600 rounded-xl font-bold shadow-sm border border-slate-200 transition-all hover:bg-orange-50";
+            });
+            
+            const activeView = document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            const activeBtn = document.getElementById('btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if(activeView) activeView.classList.remove('hidden');
+            if(activeBtn) activeBtn.className = "flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all";
 
-            if(tabName === 'quant') {
-                viewQuant.classList.remove('hidden');
-                viewPort.classList.add('hidden');
-                btnQuant.className = "flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all";
-                btnPort.className = "flex-1 py-3 bg-white text-slate-600 rounded-xl font-bold shadow-sm border border-slate-200 transition-all hover:bg-orange-50";
-            } else {
-                viewQuant.classList.add('hidden');
-                viewPort.classList.remove('hidden');
-                btnPort.className = "flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all";
-                btnQuant.className = "flex-1 py-3 bg-white text-slate-600 rounded-xl font-bold shadow-sm border border-slate-200 transition-all hover:bg-slate-50";
-                if(document.getElementById('rankingContainer').innerHTML.includes('불러오는 중')) loadPortfolioData();
+            if(tabName === 'port' || tabName === 'calc') {
+                loadPortfolioData(tabName);
             }
         }
 
@@ -197,7 +231,6 @@
             }).filter(row => row.length > 0);
         }
 
-        // 🎯 개편 로직 1: 지표 카드 내부에 어제대비 변동률(%) 연산 및 렌더링
         function extractGlobalMacroVariables() {
             masterRawData.forEach(row => {
                 if(row[0] === '지표') {
@@ -210,17 +243,17 @@
                     if(row[1] === '나스닥') {
                         document.getElementById('macro-nasdaq').innerHTML = `
                             <div class="text-xl font-extrabold mono">${live.toLocaleString()}</div>
-                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}% (어제대비)</div>`;
+                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     } else if(row[1] === '환율') {
                         globalFxDelta = prev > 0 ? (live - prev) / prev : 0;
                         document.getElementById('macro-fx').innerHTML = `
                             <div class="text-xl font-extrabold mono">₩${live.toFixed(2)}</div>
-                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}% (어제대비)</div>`;
+                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     } else if(row[1] === 'VIX') {
                         globalVixValue = live;
                         document.getElementById('macro-vix').innerHTML = `
                             <div class="text-xl font-extrabold mono">${live.toFixed(2)}</div>
-                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}% (어제대비)</div>`;
+                            <div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     }
                 }
             });
@@ -281,7 +314,6 @@
             document.getElementById('predictedChange').innerText = `${finalRet>=0?'+':''}${finalRet.toFixed(2)}%`;
             document.getElementById('predictedChange').className = `text-4xl font-black mono drop-shadow-sm ${finalRet>=0?'text-red-600':'text-blue-600'}`;
 
-            // 🎯 개편 로직 2: 오늘 예상가 아래 실시간 본체 현재가 매칭
             let expectedPrice = bPrev * (1 + finalRet / 100);
             document.getElementById('predictedPrice').innerText = `오늘 예상가: ₩${Math.round(expectedPrice).toLocaleString()}`;
             document.getElementById('currentLivePrice').innerText = `실시간 현재가: ₩${bLive > 0 ? Math.round(bLive).toLocaleString() : Math.round(bPrev).toLocaleString()}`;
@@ -291,39 +323,33 @@
             if(sig === "BUY" && bLive > 0 && ((sPrice > 0 && bLive <= sPrice * 1.01) || globalVixValue >= 25)) sig = "STRONG_BUY";
             if(sig === "SELL" && bLive > 0 && rPrice > 0 && bLive >= rPrice * 0.99) sig = "STRONG_SELL";
 
-            // 🎯 개편 로직 3, 4: 변동률 요인에 따른 기계적 분할 매매 판단 코멘트 자동화
             const c = document.getElementById('signalCard'), t = document.getElementById('signalTitle'), d = document.getElementById('signalDesc');
             let commentText = "";
-
             if(sig === "STRONG_BUY") { 
                 c.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-buy-strong relative overflow-hidden"; 
                 t.innerHTML = "STRONG BUY <span class='text-4xl'>🔥🐕</span>"; 
-                commentText = `최종 복리 변동률(${(finalRet).toFixed(2)}%)이 1차 하방선(${tBuy}%)을 완전히 돌파했으며, 현재 VIX 공포지수 가중치(${vMult}x) 및 구조적 수급 지지선 가치 영역에 도달했습니다. 감정을 배제하고 현금을 동원하여 강력한 <b>비중 확대(분할 매수)</b>를 단행하기 아주 적절한 시점입니다.`;
-            }
-            else if(sig === "BUY") { 
+                commentText = `최종 복리 변동률(${(finalRet).toFixed(2)}%)이 하방 임계치(${tBuy}%)를 하회했습니다. 공포장세를 역이용한 적극적인 <b>기계적 분할 매수</b> 구간입니다.`;
+            } else if(sig === "BUY") { 
                 c.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-buy-weak relative overflow-hidden"; 
                 t.innerHTML = "BUY <span class='text-4xl'>🛒🐕</span>"; 
-                commentText = `하위 종목 대장주들의 기여도 하락과 환율 변동으로 인해 최종 변동률(${(finalRet).toFixed(2)}%)이 매수 기준점인 ${tBuy}% 이하로 내려왔습니다. 기계적 5년 원칙에 따라 정해진 자금의 1차 <b>분할 매수</b>를 시작하기 안전한 진입 타점입니다.`;
-            }
-            else if(sig === "STRONG_SELL") { 
+                commentText = `최종 변동률(${(finalRet).toFixed(2)}%) 진입점 통과. 1차 안정적 <b>분할 매수</b>를 추천합니다.`;
+            } else if(sig === "STRONG_SELL") { 
                 c.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-sell-strong relative overflow-hidden"; 
                 t.innerHTML = "STRONG SELL <span class='text-4xl'>🚨🐕</span>"; 
-                commentText = `복리 계산 결과 변동률(${(finalRet).toFixed(2)}%)이 탐욕 임계치인 +${tSell}%를 압도적으로 상회하였고, 본체 가격이 악성 매물 저항선에 근접했습니다. 추가 상승에 연연하지 말고 탐욕 장세에서 기계적인 <b>강력 익절(분할 매도)</b>로 현금을 확보할 적기입니다.`;
-            }
-            else if(sig === "SELL") { 
+                commentText = `변동률(${(finalRet).toFixed(2)}%) 탐욕 구간 돌파 및 악성 저항권 진입. 감정을 버리고 <b>강력 익절(분할 판매)</b> 하세요.`;
+            } else if(sig === "SELL") { 
                 c.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-sell-weak relative overflow-hidden"; 
                 t.innerHTML = "SELL <span class='text-4xl'>💰🐕</span>"; 
-                commentText = `빅테크 지분 기여도 상승 및 환율 상승 팩터가 복합 작용하여 목표 수익 임계치(+${tSell}%)를 돌파했습니다. 원칙에 의거하여 보유 수량의 일정 비율을 기계적으로 <b>분할 매도</b>하여 복리 결실을 챙겨야 하는 시점입니다.`;
-            }
-            else { 
+                commentText = `목표치(+${tSell}%) 돌파. 원칙에 맞추어 안정적인 리스크 관리형 <b>분할 매도</b> 구간입니다.`;
+            } else { 
                 c.className = "p-6 rounded-2xl shadow-md transition-all duration-300 signal-hold relative overflow-hidden"; 
                 t.innerHTML = "HOLD <span class='text-4xl'>💤🐕</span>"; 
-                commentText = `현재 최종 예상 변동률(${(finalRet).toFixed(2)}%)이 매수 기준(${tBuy}%)과 매도 기준(+${tSell}%) 사이의 박스권에 머물러 있습니다. 무리한 포지션 진입이나 청산을 자제하고, 기존 보유 자산이 복리 효과를 받으며 스스로 굴러가도록 차분히 <b>관망(HOLD)</b>해야 하는 적절한 구간입니다.`;
+                commentText = `변동률(${(finalRet).toFixed(2)}%) 안정권 관망 포지션입니다. 추가 액션 없이 복리가 알아서 굴러가게 내버려두세요.`;
             }
             d.innerHTML = commentText;
         }
 
-        async function loadPortfolioData() {
+        async function loadPortfolioData(currentTab) {
             try {
                 const res = await fetch(PORTFOLIO_CSV_URL + "&t=" + new Date().getTime());
                 const matrix = parseCsvToMatrix(await res.text());
@@ -350,19 +376,19 @@
                     users[name].items.push({ stock, avgPrice, currPrice, qty, invest, current, returnPct: ((current-invest)/invest*100)||0 });
                 }
 
+                globalUserGroupedData = users; // 캐시 저장
+                
                 let rankArray = Object.values(users).map(u => {
                     u.totalReturnPct = ((u.totalCurrent - u.totalInvest) / u.totalInvest * 100) || 0;
                     return u;
                 }).sort((a,b) => b.totalReturnPct - a.totalReturnPct);
 
-                renderPortfolio(rankArray);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('rankingContainer').innerHTML = "<div class='col-span-3 text-red-500 font-bold'>데이터를 불러오는 데 실패했습니다. 링크를 확인해주세요.</div>";
-            }
+                if(currentTab === 'port') renderPortfolioView(rankArray);
+                if(currentTab === 'calc') renderCalculatorView();
+            } catch (e) { console.error(e); }
         }
 
-        function renderPortfolio(rankArray) {
+        function renderPortfolioView(rankArray) {
             let rankHtml = "", cardsHtml = "";
             const medals = ["🥇", "🥈", "🥉"];
 
@@ -370,7 +396,7 @@
                 let medal = medals[index] || "🏅";
                 let color = user.totalReturnPct >= 0 ? "text-red-500" : "text-blue-500";
                 rankHtml += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border ${index===0?'border-yellow-400 ring-2 ring-yellow-200':'border-orange-100'} flex items-center justify-between hover:-translate-y-1 transition-transform">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border ${index===0?'border-yellow-400 ring-2 ring-yellow-200':'border-orange-100'} flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-3xl">${medal}</span>
                             <div>
@@ -378,11 +404,8 @@
                                 <p class="text-xs text-slate-400">총 자산 ₩${Math.round(user.totalCurrent).toLocaleString()}</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-xl font-black mono ${color}">${user.totalReturnPct > 0 ? '+':''}${user.totalReturnPct.toFixed(2)}%</div>
-                        </div>
-                    </div>
-                `;
+                        <div class="text-right"><div class="text-xl font-black mono ${color}">${user.totalReturnPct > 0 ? '+':''}${user.totalReturnPct.toFixed(2)}%</div></div>
+                    </div>`;
 
                 let rowsHtml = "";
                 user.items.forEach(item => {
@@ -397,12 +420,11 @@
                             <td class="py-3 text-right mono text-slate-500">${item.qty}주</td>
                             <td class="py-3 text-right mono font-bold ${itemColor}">${item.returnPct>0?'+':''}${item.returnPct.toFixed(2)}%</td>
                             <td class="py-3 text-right mono font-bold text-slate-800">₩${Math.round(item.current).toLocaleString()}</td>
-                        </tr>
-                    `;
+                        </tr>`;
                 });
 
                 cardsHtml += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                         <div class="p-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                             <h4 class="font-black text-lg text-slate-800"><i class="fas fa-user-circle text-slate-400 mr-2"></i>${user.name}의 포트폴리오</h4>
                             <span class="bg-white px-3 py-1 rounded-lg border border-slate-200 font-bold mono text-sm ${user.totalReturnPct>=0?'text-red-600':'text-blue-600'}">
@@ -423,12 +445,66 @@
                                 <tbody>${rowsHtml}</tbody>
                             </table>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
-
             document.getElementById('rankingContainer').innerHTML = rankHtml;
             document.getElementById('personalCardsContainer').innerHTML = cardsHtml;
+        }
+
+        // ==================== 🎯 신규 주식구매 계산기 엔진 코어 ====================
+        function renderCalculatorView() {
+            const userSelector = document.getElementById('calcUserSelector');
+            const userNames = Object.keys(globalUserGroupedData);
+            
+            if(userNames.length === 0) return;
+            
+            // 드롭다운 채우기
+            if(userSelector.innerHTML === "") {
+                userSelector.innerHTML = userNames.map(name => `<option value="${name}">${name}</option>`).join('');
+                userSelector.addEventListener('change', calculateRebalancing);
+                document.getElementById('inputCash').addEventListener('input', calculateRebalancing);
+            }
+            
+            calculateRebalancing();
+        }
+
+        function calculateRebalancing() {
+            const targetUser = document.getElementById('calcUserSelector').value;
+            const cashInput = parseFloat(document.getElementById('inputCash').value) || 0;
+            const userObj = globalUserGroupedData[targetUser];
+            
+            if(!userObj) return;
+
+            // 💡 고정 하드코딩된 원칙 자산 비중 규칙 (동진-5기통 부스터 / 승희-마법농장 기준 매핑)
+            // 시트에 비중 컬럼을 따로 기입하지 않았을 경우를 대비한 하드코딩 균등/규칙 분할 분배 로직
+            const itemCount = userObj.items.length;
+            let totalWeight = 0;
+            
+            let tableHtml = "";
+            userObj.items.forEach((item) => {
+                // 기본 규칙 비중 세팅 (나스닥 40%, 반도체 20%, AI액티브 20%, S&P500 10%, 커버드콜 10% 형태 분배 기획 매칭)
+                let weight = 1 / itemCount; // 기본값 균등 분배
+                if(item.stock.includes('나스닥100')) weight = 0.40;
+                else if(item.stock.includes('반도체')) weight = 0.20;
+                else if(item.stock.includes('AI')) weight = 0.20;
+                else if(item.stock.includes('S&P500')) weight = 0.10;
+                else if(item.stock.includes('다우존스')) weight = 0.20; // 승희 농장 커스텀 가중치 매칭
+
+                let targetInvestMoney = cashInput * weight;
+                let recommendedQty = Math.floor(targetInvestMoney / item.currPrice);
+
+                tableHtml += `
+                    <tr class="hover:bg-orange-50/20 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-800">${item.stock}</td>
+                        <td class="px-6 py-4 text-right font-mono text-slate-400">${(weight * 100).toFixed(0)}%</td>
+                        <td class="px-6 py-4 text-right font-mono text-slate-600">₩${Math.round(item.currPrice).toLocaleString()}</td>
+                        <td class="px-6 py-4 text-right font-mono text-orange-600 font-bold bg-orange-50/40">₩${Math.round(targetInvestMoney).toLocaleString()}</td>
+                        <td class="px-6 py-4 text-right font-mono text-xl font-black text-blue-600 bg-blue-50/20">${recommendedQty} 주</td>
+                    </tr>`;
+            });
+
+            document.getElementById('calcTableBody').innerHTML = tableHtml;
+            document.getElementById('calcSummaryTotal').innerText = `${targetUser}님 총 자산 가치: ₩${Math.round(userObj.totalCurrent).toLocaleString()}`;
         }
 
         window.onload = initDashboard;
