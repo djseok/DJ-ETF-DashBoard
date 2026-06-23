@@ -342,7 +342,6 @@
                         users[name].totalCurrent += current;
                     }
 
-                    // 💡 핵심: 수량 보유 여부와 무관하게 비중(%)이 0보다 큰 것만 '투자 전략 종목'으로 자동 수집!
                     if(targetWeight > 0) {
                         users[name].items.push({ stock, targetWeight, avgPrice, currPrice, qty, invest, current });
                     }
@@ -404,7 +403,8 @@
             const selector = document.getElementById('calcUserSelector');
             const names = Object.keys(globalParsedUsers);
             if(selector.options.length === 0) {
-                selector.innerHTML = names.map(n => `<option value="${name}">${n}</option>`).join('');
+                // BUG FIX: 정상적으로 'D', 'S', 'J' 이름 렌더링
+                selector.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
                 selector.addEventListener('change', calculateRebalancing);
                 document.getElementById('inputCash').addEventListener('input', calculateRebalancing);
             }
@@ -424,7 +424,8 @@
 
             userObj.items.forEach(item => {
                 let targetMoney = cashInput * item.targetWeight;
-                let recommendedQty = Math.floor(targetMoney / item.currPrice);
+                // BUG FIX: 연산 에러 완벽 차단
+                let recommendedQty = item.currPrice > 0 ? Math.floor(targetMoney / item.currPrice) : 0;
                 let actualCost = recommendedQty * item.currPrice;
                 totalActualCost += actualCost;
 
@@ -441,25 +442,26 @@
 
             let remainingCash = cashInput - totalActualCost;
 
-            // 💡 잔돈으로 1주 우선순위 가이드 로직 계산
             userObj.items.forEach(item => {
-                let neededMoney = item.currPrice - remainingCash;
-                guideData.push({ name: item.stock, price: item.currPrice, needed: neededMoney });
+                if(item.currPrice > 0) {
+                    let neededMoney = item.currPrice - remainingCash;
+                    guideData.push({ name: item.stock, price: item.currPrice, needed: neededMoney });
+                }
             });
-            // 부족한 돈이 가장 최소인 순서대로 정렬
             guideData.sort((a,b) => a.needed - b.needed);
 
             let guideHtml = "";
             guideData.forEach((g, idx) => {
+                // BUG FIX: 오타 변수명 완전히 정돈 완료
                 let badge = g.needed <= 0 
                     ? `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-black">즉시 추가가능!</span>`
                     : `<span class="text-orange-500 font-bold mono">₩${Math.round(g.needed).toLocaleString()} 추가 투입 필요</span>`;
                 guideHtml += `
-                    <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-50">
-                        <div class="text-sm font-bold text-slate-700"><span class="text-blue-400 font-mono mr-1">${idx+1}.</span> ${guide.name}</div>
+                    <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-50 mb-2">
+                        <div class="text-sm font-bold text-slate-700"><span class="text-blue-400 font-mono mr-1">${idx+1}.</span> ${g.name}</div>
                         <div class="text-right text-xs">
-                            <div class="text-slate-400 mono mb-0.5">1주 가격: ₩${Math.round(guide.price).toLocaleString()}</div>
-                            ${statusBadge}
+                            <div class="text-slate-400 mono mb-0.5">1주 가격: ₩${Math.round(g.price).toLocaleString()}</div>
+                            ${badge}
                         </div>
                     </div>`;
             });
