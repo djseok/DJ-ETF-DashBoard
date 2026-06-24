@@ -35,7 +35,7 @@
             <img src="https://img.icons8.com/color/96/corgi.png" alt="웰시코기" class="w-14 h-14 mr-3 drop-shadow-md hover:rotate-12 transition-transform cursor-pointer">
             동진 투자 공부실
             <span class="ml-3 text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-200 shadow-sm font-bold flex items-center">
-                <i class="fas fa-paw mr-1"></i> v7.5 MASTER (배당 기여도 시각화)
+                <i class="fas fa-paw mr-1"></i> v8.0 CASH FLOW (12개월 캘린더)
             </span>
         </h1>
 
@@ -147,7 +147,7 @@
                         <select id="calcUserSelector" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500"></select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-slate-500 mb-1">💰 이번 달 투자가능 예수금 총알 (원)</label>
+                        <label class="block text-sm font-bold text-slate-500 mb-1">💰 이번 달 투자가능 예수금 (원)</label>
                         <input type="number" id="inputCash" value="500000" step="50000" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500 font-mono">
                     </div>
                 </div>
@@ -200,22 +200,24 @@
                     </div>
                     <div class="text-right">
                         <span class="text-xs font-bold text-emerald-700 bg-white/80 border border-emerald-200 px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5">
-                            <i class="fas fa-database text-emerald-500"></i> 실시간 스프레드시트 탭 무결성 동기화
+                            <i class="fas fa-calendar-check text-emerald-500"></i> 순수 실보유 주식 기반 캐시플로우
                         </span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                    <div class="bg-white/80 p-5 rounded-xl border border-green-200/50 text-center relative overflow-hidden shadow-sm">
-                        <h3 class="text-green-800 font-extrabold text-sm mb-1"><i class="fas fa-calendar-alt text-green-600 mr-1"></i> 월평균 예상 분배금 (지속 가능한 총알)</h3>
-                        <h1 class="text-3xl md:text-4xl font-black text-green-700 mono" id="monthly-dividend-display">0 원</h1>
-                        <p class="text-[11px] text-slate-400 mt-2">* 각 ETF 주기를 월단위로 균등 환산한 시뮬레이션입니다.</p>
+                <div class="mt-6 border-t border-green-200/60 pt-6">
+                    <h3 class="text-green-900 font-black text-lg mb-4 flex items-center">
+                        <i class="fas fa-money-check-alt text-green-600 mr-2"></i> 향후 12개월 캘린더 (월별 실 수령액)
+                    </h3>
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3" id="dividend-calendar">
+                        </div>
+                </div>
+                
+                <div class="mt-6 bg-white/90 rounded-xl p-4 border border-green-200 flex flex-col md:flex-row items-center justify-between shadow-sm">
+                    <div class="text-slate-600 font-bold mb-2 md:mb-0">
+                        <i class="fas fa-chart-line text-emerald-500 mr-1"></i> 향후 1년 순수 총 배당금 합계
                     </div>
-                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl text-center relative overflow-hidden shadow-md text-white">
-                        <h3 class="text-slate-400 font-extrabold text-sm mb-1"><i class="fas fa-bolt text-yellow-400 mr-1"></i> 연간 예상 총 배당금 + 예수금 파워</h3>
-                        <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mono" id="total-bullet">0 원</h1>
-                        <p class="text-[11px] text-slate-300 opacity-80 mt-2">연 배당 가치 <span id="annual-dividend-pure" class="font-bold">0</span>원 + 대시보드 입력 예수금</p>
-                    </div>
+                    <div class="text-2xl md:text-3xl font-black text-emerald-700 mono" id="annual-dividend-pure">₩0</div>
                 </div>
             </div>
 
@@ -230,7 +232,7 @@
                                 <th class="px-6 py-4">배당 종목명</th>
                                 <th class="px-6 py-4 text-center">실보유 수량</th>
                                 <th class="px-6 py-4 text-right">산정 기준 분배금 (1회당)</th>
-                                <th class="px-6 py-4 text-right text-emerald-700 bg-emerald-50/50">월평균 예상 수령액</th>
+                                <th class="px-6 py-4 text-right text-emerald-700 bg-emerald-50/50">연간 기여액</th>
                             </tr>
                         </thead>
                         <tbody id="dividend-breakdown-body" class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -242,7 +244,7 @@
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 bg-slate-800 border-b border-slate-900 flex items-center text-white font-bold">
-                    <i class="fas fa-list-ul mr-2 text-emerald-400"></i> 시트 기록 기반 분배금 입금 이력 (전체 로그)
+                    <i class="fas fa-history mr-2 text-slate-400"></i> 시트 기록 기반 분배금 입금 이력 (과거 로그)
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left whitespace-nowrap">
@@ -296,14 +298,15 @@
         let globalCalculatedStrategyDividends = {}; 
         let globalRawDividendLogs = [];             
 
+        // 🌟 [핵심 업데이트] 분배 월(payMonths) 스키마 정의 (배당 캘린더용)
         const DIVIDEND_SCHEME_MATRIX = {
-            "KODEX 미국나스닥100데일리커버드콜OTM": { timesPerYear: 12, strategy: "recent3" },    
-            "TIGER 미국배당다우존스": { timesPerYear: 12, strategy: "rolling12" }, 
-            "RISE 미국나스닥100": { timesPerYear: 4, strategy: "latest" },       
-            "KODEX 미국반도체": { timesPerYear: 4, strategy: "latest" },        
-            "RISE 미국S&P500": { timesPerYear: 4, strategy: "latest" },         
-            "KODEX 미국S&P500": { timesPerYear: 4, strategy: "latest" },        
-            "TIME 글로벌AI인공지능액티브": { timesPerYear: 4, strategy: "allAverage" } 
+            "KODEX 미국나스닥100데일리커버드콜OTM": { strategy: "recent3", payMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },    
+            "TIGER 미국배당다우존스": { strategy: "rolling12", payMonths: [1,2,3,4,5,6,7,8,9,10,11,12] }, 
+            "RISE 미국나스닥100": { strategy: "latest", payMonths: [3,6,9,12] },       
+            "KODEX 미국반도체": { strategy: "latest", payMonths: [1,4,7,10] },        
+            "RISE 미국S&P500": { strategy: "latest", payMonths: [3,6,9,12] },         
+            "KODEX 미국S&P500": { strategy: "latest", payMonths: [1,4,7,10] },        
+            "TIME 글로벌AI인공지능액티브": { strategy: "allAverage", payMonths: [1,4,7,10] } 
         };
 
         const ETF_COMPOSITION_MATRIX = {
@@ -332,7 +335,6 @@
                 else if(tabName === 'conc') activeBtn.className = "flex-1 py-3 bg-purple-700 text-white rounded-xl font-bold shadow-md transition-all whitespace-nowrap";
                 else activeBtn.className = "flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all whitespace-nowrap";
             }
-
             if(['port', 'calc', 'conc', 'div'].includes(tabName)) loadPortfolioData(tabName);
         }
 
@@ -344,11 +346,7 @@
                 populateAssetDropdownSelector();
                 if(masterRawData.length > 0) renderTargetAssetDashboard(document.getElementById('assetSelector').value);
                 document.getElementById('assetSelector').addEventListener('change', (e) => renderTargetAssetDashboard(e.target.value));
-                
-                document.getElementById('inputCash').addEventListener('input', () => {
-                    calculateRebalancing();
-                    if(!document.getElementById('viewDiv').classList.contains('hidden')) calculateExpectedDividends();
-                });
+                document.getElementById('inputCash').addEventListener('input', calculateRebalancing);
             } catch (err) { console.error(err); }
         }
 
@@ -683,20 +681,21 @@
             calculateExpectedDividends();
         }
 
-        // 🌟 [수정 완료] 수량 × 분배금 기준 단가 매핑 및 실시간 기여도 표 동적 빌드 파트
+        // 🌟 [최종 진화] 월별 캘린더 배분 및 순수 배당금 렌더링 로직
         function calculateExpectedDividends() {
             const targetUser = document.getElementById('divUserSelector').value;
             const userObj = globalParsedUsers[targetUser];
             if(!userObj) return;
 
             let totalAnnualDividend = 0;
-            let breakdownHtml = ""; // 종목별 분석 표 바디 스트링
+            let breakdownHtml = "";
+            let monthlyCalendar = new Array(12).fill(0); // 1월~12월 달력 배열 초기화
 
             userObj.items.forEach(item => {
                 if(item.qty <= 0) return;
                 
                 let baseDividend1Time = 0;
-                let timesPerYear = 12; 
+                let payMonths = [1,2,3,4,5,6,7,8,9,10,11,12]; // 기본 월배당 세팅
                 let strategyText = "기본연산";
 
                 let cleanedItemStock = item.stock.replace(/\s+/g, '');
@@ -711,7 +710,7 @@
                 for(let key in DIVIDEND_SCHEME_MATRIX) {
                     let cleanedKey = key.replace(/\s+/g, '');
                     if(cleanedItemStock.includes(cleanedKey) || cleanedKey.includes(cleanedItemStock)) {
-                        timesPerYear = DIVIDEND_SCHEME_MATRIX[key].timesPerYear;
+                        payMonths = DIVIDEND_SCHEME_MATRIX[key].payMonths;
                         let strat = DIVIDEND_SCHEME_MATRIX[key].strategy;
                         if(strat === "recent3") strategyText = "최근 3개월 평균";
                         else if(strat === "rolling12") strategyText = "12개월 평균";
@@ -721,14 +720,16 @@
                     }
                 }
 
-                // 기하학적 총 합산 연산
-                let annualPure = item.qty * baseDividend1Time * timesPerYear;
-                totalAnnualDividend += annualPure;
+                let singlePaymentTotal = item.qty * baseDividend1Time;
+                
+                // 해당 종목이 지급하는 월(month) 달력 칸에 수령액 더하기
+                payMonths.forEach(monthNum => {
+                    monthlyCalendar[monthNum - 1] += singlePaymentTotal; 
+                    totalAnnualDividend += singlePaymentTotal; // 연간 총합 누적
+                });
 
-                let monthlyPure = annualPure / 12;
-                let cycleText = timesPerYear === 12 ? "월지급" : (timesPerYear === 4 ? "분기지급" : "비정기");
+                let cycleText = payMonths.length === 12 ? "매월" : (payMonths.length === 4 ? "분기" : "비정기");
 
-                // 🌟 종목별 상세 시각화 데이터 렌더링 세팅
                 breakdownHtml += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-800">
@@ -740,24 +741,39 @@
                         <td class="px-6 py-4 text-center font-mono text-slate-700 font-extrabold text-sm">${item.qty.toLocaleString()} 주</td>
                         <td class="px-6 py-4 text-right font-mono text-slate-600">
                             <div class="font-black text-slate-800">₩${Math.round(baseDividend1Time).toLocaleString()}</div>
-                            <div class="text-[10px] text-slate-400 font-semibold mt-0.5">${cycleText} (연 ${timesPerYear}회)</div>
+                            <div class="text-[10px] text-slate-400 font-semibold mt-0.5">${cycleText} (연 ${payMonths.length}회)</div>
                         </td>
                         <td class="px-6 py-4 text-right font-black text-emerald-600 mono text-base bg-emerald-50/20">
-                            ₩${Math.round(monthlyPure).toLocaleString()}
+                            ₩${Math.round(singlePaymentTotal * payMonths.length).toLocaleString()}
                         </td>
                     </tr>
                 `;
             });
 
-            let totalMonthlyDividendAvg = totalAnnualDividend / 12;
-            let baseCashInput = parseFloat(document.getElementById('inputCash').value) || 0;
-
-            document.getElementById("monthly-dividend-display").innerText = `₩${Math.round(totalMonthlyDividendAvg).toLocaleString()}`;
-            document.getElementById("annual-dividend-pure").innerText = Math.round(totalAnnualDividend).toLocaleString();
-            document.getElementById("total-bullet").innerText = `₩${Math.round(baseCashInput + totalAnnualDividend).toLocaleString()}`;
-
-            // 상세 표 컨테이너에 동적 이식
+            // 상단 전광판 데이터 렌더링 (순수 배당금 기준)
+            document.getElementById("annual-dividend-pure").innerText = `₩${Math.round(totalAnnualDividend).toLocaleString()}`;
             document.getElementById("dividend-breakdown-body").innerHTML = breakdownHtml || `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-bold">보유 중인 배당 자산이 없습니다.</td></tr>`;
+
+            // 🌟 12개월 캘린더 블록 동적 렌더링
+            let calendarHtml = "";
+            monthlyCalendar.forEach((amount, index) => {
+                let monthStr = `${index + 1}월`;
+                let isHighMonth = amount > (totalAnnualDividend / 12) * 1.5; // 평균보다 1.5배 많이 들어오는 달 강조
+                let bgClass = amount > 0 ? (isHighMonth ? "bg-emerald-50 border-emerald-300" : "bg-white border-slate-200") : "bg-slate-50 border-slate-100 opacity-60";
+                let textClass = amount > 0 ? "text-emerald-700" : "text-slate-400";
+                
+                calendarHtml += `
+                    <div class="${bgClass} border rounded-xl p-3 text-center shadow-sm flex flex-col justify-center h-full transition-all">
+                        <div class="text-xs font-bold text-slate-500 mb-1 flex items-center justify-center">
+                            ${monthStr} ${isHighMonth ? '<i class="fas fa-star text-yellow-400 ml-1 text-[10px]"></i>' : ''}
+                        </div>
+                        <div class="text-sm md:text-base font-black ${textClass} mono">
+                            ${amount > 0 ? '₩' + Math.round(amount).toLocaleString() : '-'}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById("dividend-calendar").innerHTML = calendarHtml;
 
             renderDividendHistoryTable();
         }
