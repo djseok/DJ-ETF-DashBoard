@@ -35,7 +35,7 @@
             <img src="https://img.icons8.com/color/96/corgi.png" alt="웰시코기" class="w-14 h-14 mr-3 drop-shadow-md hover:rotate-12 transition-transform cursor-pointer">
             동진 투자 공부실
             <span class="ml-3 text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full border border-orange-200 shadow-sm font-bold flex items-center">
-                <i class="fas fa-paw mr-1"></i> v5.5 NO-CODE (통합본)
+                <i class="fas fa-paw mr-1"></i> v6.0 PRO (멀티 유저 분석 연동)
             </span>
         </h1>
 
@@ -48,18 +48,22 @@
         </div>
 
         <div id="viewQuant" class="space-y-6 block">
-            <div id="macroPanel" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <span class="text-slate-500 font-bold text-sm"><i class="fas fa-chart-line text-blue-500 mr-1"></i> 나스닥</span>
-                    <div class="text-right" id="macro-nasdaq"><span class="text-xl font-extrabold mono">-</span></div>
+            <div id="macroPanel" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-slate-500 font-bold text-xs mb-1"><i class="fas fa-chart-line text-blue-500 mr-1"></i> 나스닥</span>
+                    <div class="text-right" id="macro-nasdaq"><span class="text-lg font-extrabold mono text-slate-300">-</span></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <span class="text-slate-500 font-bold text-sm"><i class="fas fa-exchange-alt text-green-500 mr-1"></i> 환율</span>
-                    <div class="text-right" id="macro-fx"><span class="text-xl font-extrabold mono">₩-</span></div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-slate-500 font-bold text-xs mb-1"><i class="fas fa-exchange-alt text-green-500 mr-1"></i> 환율</span>
+                    <div class="text-right" id="macro-fx"><span class="text-lg font-extrabold mono text-slate-300">₩-</span></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <span class="text-slate-500 font-bold text-sm"><i class="fas fa-fire text-red-500 mr-1"></i> VIX (공포지수)</span>
-                    <div class="text-right" id="macro-vix"><span class="text-xl font-extrabold mono">-</span></div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-slate-500 font-bold text-xs mb-1"><i class="fas fa-fire text-red-500 mr-1"></i> VIX (단기공포)</span>
+                    <div class="text-right" id="macro-vix"><span class="text-lg font-extrabold mono text-slate-300">-</span></div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-slate-500 font-bold text-xs mb-1"><i class="fas fa-landmark text-purple-500 mr-1"></i> 10년물 국채 (TNX)</span>
+                    <div class="text-right" id="macro-tnx"><span class="text-xs font-bold text-slate-400">시트 연동 대기중</span></div>
                 </div>
             </div>
 
@@ -181,7 +185,6 @@
                     </table>
                 </div>
             </div>
-
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
                 <h3 class="font-extrabold text-blue-900 mb-3 flex items-center"><i class="fas fa-coins text-blue-500 mr-2"></i>💡 잔돈으로 1주 더! (부족분 최소 우선순위 가이드)</h3>
                 <div id="extraBuyGuide" class="space-y-2"></div>
@@ -196,9 +199,8 @@
                 <p class="text-sm font-bold text-slate-600 bg-white/60 inline-block px-4 py-2 rounded-full shadow-inner">
                     <i class="fas fa-piggy-bank mr-1 text-pink-500"></i> 누적 분배금: <b id="total-dividends-display" class="text-slate-800">0</b>원 + 투자가능 예수금
                 </p>
-                <p class="text-xs text-slate-400 mt-3">* 예수금은 [구매 계산기] 탭의 금액과 연동됩니다.</p>
+                <p class="text-xs text-slate-400 mt-3">* 예수금은 [구매 계산기] 탭의 금액과 연동됩니다. (상세 내역은 귀가 후 업데이트 예정)</p>
             </div>
-
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 bg-slate-800 border-b border-slate-900 flex items-center text-white font-bold">
                     <i class="fas fa-list-ul mr-2 text-emerald-400"></i> 최근 배당 입금 이력 (계좌 내역 최신순)
@@ -213,7 +215,7 @@
                             </tr>
                         </thead>
                         <tbody id="dividend-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -222,40 +224,17 @@
         <div id="viewConc" class="hidden space-y-6">
              <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-xl font-black text-slate-800 mb-3 flex items-center"><i class="fas fa-search-dollar text-purple-500 mr-2"></i> 실질 종목 집중도 리스크 스캐너</h2>
-                <p class="text-sm text-slate-500 mb-8 font-medium">여러 ETF에 분산 투자했더라도, 내부 구성 종목을 모두 합산해 보면 특정 빅테크 기업에 기형적으로 쏠려 있을 수 있습니다. 내 계좌의 <b>진짜 단일 종목 노출도</b>를 스캔합니다.</p>
+                <p class="text-sm text-slate-500 mb-6 font-medium">여러 ETF에 분산 투자했더라도, 내부 구성 종목을 모두 합산해 보면 특정 빅테크 기업에 기형적으로 쏠려 있을 수 있습니다. 멤버별 실보유 데이터를 기반으로 <b>진짜 단일 종목 노출도</b>를 스캔합니다.</p>
 
-                <div class="space-y-6">
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="font-bold text-slate-800 text-lg">엔비디아 (NVIDIA)</span>
-                            <span class="text-red-500 font-black px-2 py-1 bg-red-50 rounded text-sm">28.5% (위험 경고!)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden border border-slate-200 shadow-inner">
-                            <div class="bg-gradient-to-r from-red-400 to-red-500 h-5 rounded-full" style="width: 28.5%"></div>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1 text-right">※ KODEX 반도체 및 AI 액티브 합산 수치</p>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="font-bold text-slate-800 text-lg">마이크로소프트 (MSFT)</span>
-                            <span class="text-blue-500 font-black px-2 py-1 bg-blue-50 rounded text-sm">15.2% (안정적)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden border border-slate-200 shadow-inner">
-                            <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-5 rounded-full" style="width: 15.2%"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="font-bold text-slate-800 text-lg">애플 (AAPL)</span>
-                            <span class="text-slate-600 font-black px-2 py-1 bg-slate-50 rounded text-sm">12.0% (안정적)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden border border-slate-200 shadow-inner">
-                            <div class="bg-gradient-to-r from-slate-500 to-slate-600 h-5 rounded-full" style="width: 12%"></div>
-                        </div>
-                    </div>
+                <div class="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <label class="block text-sm font-bold text-slate-500 mb-2">🧑‍💻 분석 대상 멤버 선택</label>
+                    <select id="concUserSelector" class="w-full md:w-64 bg-white border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-purple-500 focus:border-purple-500 shadow-sm"></select>
                 </div>
+
+                <div id="concResultsContainer" class="space-y-6">
+                    <div class="text-center py-10 text-slate-400 font-bold">시트 데이터를 파싱 중입니다...</div>
+                </div>
+                
                 <div class="mt-8 p-4 bg-purple-50 border border-purple-100 rounded-xl text-sm font-bold text-purple-800">
                     <i class="fas fa-info-circle mr-1"></i> 특정 단일 종목의 비중이 전체 자산의 20%를 초과할 경우, 하락장에서 포트폴리오 방어력이 급격히 떨어질 수 있으니 비중 조절을 권장합니다.
                 </div>
@@ -274,7 +253,17 @@
         let globalVixValue = 15;
         let globalParsedUsers = {}; 
 
-        // 🌟 [신규] 배당 이력 원본 데이터 및 수량 매핑
+        // 🌟 [신규] ETF별 핵심 빅테크 편입 비중 매트릭스 (자유롭게 비율 수정 가능)
+        // 향후 포트폴리오에 새로운 ETF가 추가되면 여기에 비중만 추가하시면 됩니다.
+        const ETF_COMPOSITION_MATRIX = {
+            "KODEX 미국반도체": { "NVIDIA (NVDA)": 0.25, "AMD (AMD)": 0.10, "TSMC (TSM)": 0.10 },
+            "TIME 글로벌AI인공지능액티브": { "NVIDIA (NVDA)": 0.18, "Microsoft (MSFT)": 0.15, "Alphabet (GOOGL)": 0.10, "Meta (META)": 0.08 },
+            "RISE 미국나스닥100": { "Microsoft (MSFT)": 0.09, "Apple (AAPL)": 0.09, "NVIDIA (NVDA)": 0.08, "Amazon (AMZN)": 0.05, "Tesla (TSLA)": 0.03 },
+            "KODEX 미국나스닥100데일리커버드콜OTM": { "Microsoft (MSFT)": 0.09, "Apple (AAPL)": 0.09, "NVIDIA (NVDA)": 0.08, "Amazon (AMZN)": 0.05, "Tesla (TSLA)": 0.03 },
+            "TIGER 미국배당다우존스": { "Broadcom (AVGO)": 0.05, "Home Depot (HD)": 0.04, "Texas Instruments (TXN)": 0.04 }
+        };
+
+        // 🌟 기존 배당 이력 로직 (유지)
         const myHoldings = {
             "KODEX 미국나스닥100데일리커버드콜OTM": 500,
             "RISE 미국나스닥100": 250,
@@ -295,7 +284,6 @@
         dividendData.sort((a, b) => new Date(b.date) - new Date(a.date));
         let globalTotalDividends = 0;
 
-        // 🌟 탭 전환 로직 (신규 탭 추가)
         function switchTab(tabName) {
             const tabs = ['Quant', 'Port', 'Calc', 'Div', 'Conc'];
             tabs.forEach(t => {
@@ -308,13 +296,12 @@
             const activeBtn = document.getElementById('btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
             if(activeView) activeView.classList.remove('hidden');
             if(activeBtn) {
-                // 선택된 탭별로 하이라이트 컬러 다르게 적용 (Tailwind 감성)
                 if(tabName === 'div') activeBtn.className = "flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-md transition-all whitespace-nowrap";
                 else if(tabName === 'conc') activeBtn.className = "flex-1 py-3 bg-purple-700 text-white rounded-xl font-bold shadow-md transition-all whitespace-nowrap";
                 else activeBtn.className = "flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all whitespace-nowrap";
             }
 
-            if(tabName === 'port' || tabName === 'calc') loadPortfolioData(tabName);
+            if(tabName === 'port' || tabName === 'calc' || tabName === 'conc') loadPortfolioData(tabName);
         }
 
         async function initDashboard() {
@@ -326,19 +313,15 @@
                 if(masterRawData.length > 0) renderTargetAssetDashboard(document.getElementById('assetSelector').value);
                 document.getElementById('assetSelector').addEventListener('change', (e) => renderTargetAssetDashboard(e.target.value));
                 
-                // 이벤트 리스너 추가: 계산기 예수금 변경 시 배당 총알도 같이 업데이트
                 document.getElementById('inputCash').addEventListener('input', () => {
                     calculateRebalancing();
                     updateTotalBullet();
                 });
 
-                // 초기 로드 시 배당금 렌더링
                 renderDividends();
-
             } catch (err) { console.error(err); }
         }
 
-        // --- (기존 로직 100% 유지 영역) ---
         function parseCsvToMatrix(text) {
             return text.split('\n').map(row => {
                 let match = row.match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$|\r|$)/g);
@@ -346,6 +329,7 @@
             }).filter(row => row.length > 0);
         }
 
+        // 🌟 수정됨: 국채금리(TNX) 파싱 로직 추가
         function extractGlobalMacroVariables() {
             masterRawData.forEach(row => {
                 if(row[0] === '지표') {
@@ -356,13 +340,16 @@
                     let sign = pct >= 0 ? '▲' : '▼';
 
                     if(row[1] === '나스닥') {
-                        document.getElementById('macro-nasdaq').innerHTML = `<div class="text-xl font-extrabold mono">${live.toLocaleString()}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
+                        document.getElementById('macro-nasdaq').innerHTML = `<div class="text-xl md:text-2xl font-extrabold mono">${live.toLocaleString()}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     } else if(row[1] === '환율') {
                         globalFxDelta = prev > 0 ? (live - prev) / prev : 0;
-                        document.getElementById('macro-fx').innerHTML = `<div class="text-xl font-extrabold mono">₩${live.toFixed(2)}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
+                        document.getElementById('macro-fx').innerHTML = `<div class="text-xl md:text-2xl font-extrabold mono">₩${live.toFixed(2)}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     } else if(row[1] === 'VIX') {
                         globalVixValue = live;
-                        document.getElementById('macro-vix').innerHTML = `<div class="text-xl font-extrabold mono">${live.toFixed(2)}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
+                        document.getElementById('macro-vix').innerHTML = `<div class="text-xl md:text-2xl font-extrabold mono">${live.toFixed(2)}</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
+                    } else if(row[1].includes('국채') || row[1].includes('TNX')) {
+                        // 사용자가 구글 시트 지표에 '국채금리'를 추가하면 자동으로 여기서 파싱합니다.
+                        document.getElementById('macro-tnx').innerHTML = `<div class="text-xl md:text-2xl font-extrabold mono">${live.toFixed(2)}%</div><div class="text-xs font-bold ${colorClass}">${sign} ${Math.abs(pct).toFixed(2)}%</div>`;
                     }
                 }
             });
@@ -458,6 +445,10 @@
 
                 if(currentTab === 'port') renderPortfolioView(rankArray);
                 if(currentTab === 'calc') renderCalculatorView();
+                
+                // 신규: 집중도 탭 초기화 연결
+                if(currentTab === 'conc') initConcentrationView();
+
             } catch (e) { console.error(e); }
         }
 
@@ -524,7 +515,87 @@
             document.getElementById('extraBuyGuide').innerHTML = guideHtml;
         }
 
-        // 🌟 [신규] 배당금 렌더링 및 예수금 합산 로직
+        // 🌟 [신규] S/D/J 선택 연동형 집중도 스캐너 핵심 로직
+        function initConcentrationView() {
+            const selector = document.getElementById('concUserSelector');
+            const names = Object.keys(globalParsedUsers);
+            if(selector.options.length === 0) {
+                selector.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+                selector.addEventListener('change', renderConcentrationView);
+            }
+            renderConcentrationView();
+        }
+
+        function renderConcentrationView() {
+            const targetUser = document.getElementById('concUserSelector').value;
+            const userObj = globalParsedUsers[targetUser];
+            if(!userObj) return;
+
+            let totalAssets = userObj.totalCurrent;
+            let stockExposure = {};
+
+            // 1. 멤버가 가진 각 ETF별 자산액 추출하여, 하위 빅테크 종목으로 환산
+            userObj.items.forEach(item => {
+                if (item.current <= 0) return;
+                
+                let etfWeights = null;
+                // ETF 이름 텍스트 매칭 (유사 단어 포함시 자동 인식)
+                for (let key in ETF_COMPOSITION_MATRIX) {
+                    if (item.stock.includes(key) || key.includes(item.stock)) {
+                        etfWeights = ETF_COMPOSITION_MATRIX[key];
+                        break;
+                    }
+                }
+
+                if (etfWeights) {
+                    for (let singleStock in etfWeights) {
+                        if (!stockExposure[singleStock]) stockExposure[singleStock] = 0;
+                        stockExposure[singleStock] += item.current * etfWeights[singleStock];
+                    }
+                }
+            });
+
+            // 2. 비중이 높은 순서대로 정렬
+            let sortedStocks = Object.keys(stockExposure).map(s => {
+                return { name: s, amount: stockExposure[s], percent: (stockExposure[s] / totalAssets) * 100 };
+            }).sort((a, b) => b.percent - a.percent);
+
+            let resultsHtml = '';
+            if (sortedStocks.length === 0) {
+                resultsHtml = `<div class="p-6 text-center text-slate-500 font-bold bg-slate-50 rounded-xl border border-slate-200">선택하신 투자자의 포트폴리오는 현재 분석 가능한 주요 빅테크 종목 비중이 없습니다.</div>`;
+            } else {
+                sortedStocks.forEach(stock => {
+                    if(stock.percent < 0.5) return; // 0.5% 미만의 미세한 찌꺼기는 무시
+
+                    let badgeClass = "bg-slate-50 text-slate-600";
+                    let barClass = "from-slate-400 to-slate-500";
+                    let warningText = "안정적";
+
+                    if (stock.percent >= 20) {
+                        badgeClass = "bg-red-50 text-red-600";
+                        barClass = "from-red-400 to-red-500";
+                        warningText = "위험 경고! 분산 필요";
+                    } else if (stock.percent >= 10) {
+                        badgeClass = "bg-blue-50 text-blue-600";
+                        barClass = "from-blue-400 to-blue-500";
+                        warningText = "비중 주의";
+                    }
+
+                    resultsHtml += `
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="font-bold text-slate-800 text-lg">${stock.name}</span>
+                            <span class="${badgeClass} font-black px-2 py-1 rounded text-sm shadow-sm">${stock.percent.toFixed(1)}% (${warningText})</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden border border-slate-200 shadow-inner">
+                            <div class="bg-gradient-to-r ${barClass} h-5 rounded-full transition-all duration-1000 ease-out" style="width: ${stock.percent}%"></div>
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById('concResultsContainer').innerHTML = resultsHtml;
+        }
+
         function renderDividends() {
             const tbody = document.getElementById("dividend-table-body");
             globalTotalDividends = 0; 
