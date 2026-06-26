@@ -26,6 +26,7 @@
         .signal-sell-weak { background-color: #f0fdf4; border-left: 8px solid #16a34a; color: #14532d; }
         .signal-hold { background-color: #f8fafc; border-left: 8px solid #64748b; color: #334155; }
         .corgi-bg { background-image: url('https://img.icons8.com/color/96/corgi.png'); background-repeat: no-repeat; background-position: right -10px bottom -10px; background-size: 120px; opacity: 0.1; position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+        /* 수량 조절 버튼(화살표) 숨기기 */
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -141,6 +142,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
                 <h2 class="text-xl font-black text-slate-800 flex items-center"><i class="fas fa-calculator text-orange-500 mr-2"></i> 스마트 매수 시뮬레이터 (직접 계획)</h2>
                 <p class="text-sm text-slate-500 font-medium">자동 추천된 전략 비중을 참고하여, 아래 표의 <b>[예상 매수 수량]</b> 칸의 숫자를 직접 변경하며 이번 달 쇼핑 계획을 세워보세요.</p>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-slate-500 mb-1">🚀 대상 투자자 선택</label>
@@ -152,6 +154,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                 <div class="p-4 bg-slate-800 border-b border-slate-900 flex justify-between items-center text-white">
                     <h3 class="font-bold"><i class="fas fa-shopping-cart mr-2 text-orange-400"></i> 전략 기준 구매 검토 장바구니</h3>
@@ -191,12 +194,14 @@
         </div>
 
         <div id="viewDiv" class="hidden space-y-6">
+            
             <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-6 rounded-2xl shadow-md text-center relative overflow-hidden flex flex-col items-center justify-center border border-blue-700">
                 <i class="fas fa-piggy-bank absolute top-4 left-4 text-5xl text-blue-400 opacity-20"></i>
                 <h3 class="text-blue-200 font-extrabold text-sm mb-2"><i class="fas fa-check-circle text-blue-400 mr-1"></i> 통장에 입금된 누적 실수령액 합계</h3>
                 <h1 class="text-4xl md:text-5xl font-black text-white mono drop-shadow-sm" id="actual-received-dividend">₩0</h1>
                 <p class="text-[11px] text-blue-300 opacity-80 mt-3 bg-blue-950/50 px-3 py-1 rounded-full" id="actual-received-name-label">4번 실수령 시트 연동 중...</p>
             </div>
+
             <div class="bg-gradient-to-br from-emerald-50 to-green-100 p-6 rounded-2xl shadow-sm border border-green-200">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -209,12 +214,15 @@
                         </span>
                     </div>
                 </div>
+
                 <div class="mt-6 border-t border-green-200/60 pt-6">
                     <h3 class="text-green-900 font-black text-lg mb-4 flex items-center">
                         <i class="fas fa-money-check-alt text-green-600 mr-2"></i> 남은 하반기 캘린더 (월별 예상 수령액)
                     </h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3" id="dividend-calendar"></div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3" id="dividend-calendar">
+                        </div>
                 </div>
+                
                 <div class="mt-6 bg-white/90 rounded-xl p-4 border border-green-200 flex flex-col md:flex-row items-center justify-between shadow-sm">
                     <div class="text-slate-600 font-bold mb-2 md:mb-0">
                         <i class="fas fa-chart-line text-emerald-500 mr-1"></i> 향후 1년 예상 총 배당금 합계
@@ -222,6 +230,7 @@
                     <div class="text-2xl md:text-3xl font-black text-emerald-700 mono" id="annual-dividend-pure">₩0</div>
                 </div>
             </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 bg-emerald-700 border-b border-emerald-800 flex items-center text-white font-bold">
                     <i class="fas fa-chart-pie mr-2 text-emerald-300"></i> 선택 투자자의 종목별 예상 배당 기여도 상세
@@ -242,6 +251,7 @@
                     </table>
                 </div>
             </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 bg-blue-800 border-b border-blue-900 flex items-center text-white font-bold">
                     <i class="fas fa-book mr-2 text-blue-300"></i> 4번 시트 연동: <span id="actual-table-title-name" class="mx-1 text-yellow-300">멤버</span>의 실제 배당금 입금 다이어리
@@ -267,24 +277,26 @@
              <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-xl font-black text-slate-800 mb-3 flex items-center"><i class="fas fa-search-dollar text-purple-500 mr-2"></i> 실질 종목 집중도 리스크 스캐너</h2>
                 <p class="text-sm text-slate-500 mb-6 font-medium">여러 ETF에 분산 투자했더라도, 내부 구성 종목을 모두 합산해 보면 특정 빅테크 기업에 기형적으로 쏠려 있을 수 있습니다. 멤버별 실보유 데이터를 기반으로 <b>진짜 단일 종목 노출도</b>를 스캔합니다.</p>
+
                 <div class="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                     <label class="block text-sm font-bold text-slate-500 mb-2">🧑‍💻 분석 대상 멤버 선택</label>
                     <select id="concUserSelector" class="w-full md:w-64 bg-white border border-slate-300 text-slate-900 text-sm font-bold rounded-xl p-3 focus:ring-purple-500 focus:border-purple-500 shadow-sm"></select>
                 </div>
+
                 <div id="concResultsContainer" class="space-y-6">
                     <div class="text-center py-10 text-slate-400 font-bold">시트 데이터를 파싱 중입니다...</div>
                 </div>
+                
                 <div class="mt-8 p-4 bg-purple-50 border border-purple-100 rounded-xl text-sm font-bold text-purple-800">
                     <i class="fas fa-info-circle mr-1"></i> 특정 단일 종목의 비중이 전체 자산의 20%를 초과할 경우, 하락장에서 포트폴리오 방어력이 급격히 떨어질 수 있으니 비중 조절을 권장합니다.
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
-        // 🚨 [매우 중요] 동진님의 구글 웹 앱 URL(GAS 배포 주소)을 아래 큰따옴표 안에 넣어주세요!
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbx6aAKwNbImfH1K5VpYDskfMpgRWNqMWxDegERWj2Stv82BBYQVBVCOa0hhDNrTrQ--/exec";
-
+        // 🌟 사용자 제공 완벽 동기화 CSV URL 4종 세트 (강력 캐시 방지)
         const timestamp = new Date().getTime();
         const QUANT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?gid=0&single=true&output=csv&t=" + timestamp;
         const PORTFOLIO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyotJ2TeefWbfE61uwtnUh68sk-QE4H9HULDkIaKFXbihMYFqNGXL9N2gqSBgxONQze_sTwuo4QgBN/pub?gid=539824393&single=true&output=csv&t=" + timestamp;
@@ -295,9 +307,12 @@
         let globalFxDelta = 0;
         let globalVixValue = 15;
         let globalParsedUsers = {}; 
+        
         let globalCalculatedStrategyDividends = {}; 
+        let globalRawDividendLogs = [];             
         let globalActualDividendLogs = [];
 
+        // 🌟 분배 월(payMonths) 스키마 정의
         const DIVIDEND_SCHEME_MATRIX = {
             "KODEX 미국나스닥100데일리커버드콜OTM": { strategy: "recent3", payMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },    
             "TIGER 미국배당다우존스": { strategy: "rolling12", payMonths: [1,2,3,4,5,6,7,8,9,10,11,12] }, 
@@ -317,30 +332,6 @@
             "RISE 미국S&P500": { "Microsoft (MSFT)": 0.07, "Apple (AAPL)": 0.06, "NVIDIA (NVDA)": 0.06 },
             "KODEX 미국S&P500": { "Microsoft (MSFT)": 0.07, "Apple (AAPL)": 0.06, "NVIDIA (NVDA)": 0.06 }
         };
-
-        // 🔗 한국투자증권 실시간 API 데이터를 받아오는 신규 동기화 함수
-        async function fetchLivePriceFromGAS() {
-            if (!GAS_URL || GAS_URL.includes("여기에")) return;
-            try {
-                const response = await fetch(GAS_URL);
-                const data = await response.json();
-                console.log("한국투자증권 API 실시간 수신 데이터:", data);
-                
-                // 만약 수신 데이터에 가격이 있고 에러가 아니라면 화면에 강제 교정 반영
-                if (data.price && data.price !== "Error") {
-                    const selectedAsset = document.getElementById('assetSelector').value;
-                    // 현재 선택된 종목이 샘플 API 종목(삼성전자 등)인 경우 연동 시각화
-                    if (selectedAsset.includes("삼성") || data.symbol === "005930") {
-                        const livePriceEl = document.getElementById('currentLivePrice');
-                        if (livePriceEl) {
-                            livePriceEl.innerHTML = `<i class="fas fa-bolt text-yellow-500 mr-1"></i> 실시간 API 가격: ₩${parseInt(data.price).toLocaleString()}`;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("GAS API 연동 오류:", error);
-            }
-        }
 
         function switchTab(tabName) {
             const tabs = ['Quant', 'Port', 'Calc', 'Div', 'Conc'];
@@ -372,11 +363,6 @@
                 document.getElementById('inputCash').addEventListener('input', () => {
                     if(!document.getElementById('viewCalc').classList.contains('hidden')) calculateRebalancing();
                 });
-                
-                // 엔진 구동 후 실시간 증권사 API 호출 시작
-                fetchLivePriceFromGAS();
-                setInterval(fetchLivePriceFromGAS, 60000); // 1분 주기로 실시간 갱신
-
             } catch (err) { console.error(err); }
         }
 
@@ -506,10 +492,12 @@
                 if(currentTab === 'port') renderPortfolioView(rankArray);
                 if(currentTab === 'calc') renderCalculatorView();
                 if(currentTab === 'conc') initConcentrationView();
+                
                 if(currentTab === 'div') {
-                    await loadDividendHistoryData();
-                    await loadActualDividendData();
+                    loadDividendHistoryData();
+                    loadActualDividendData();
                 }
+
             } catch (e) { console.error("포트폴리오 로드 실패:", e); }
         }
 
@@ -595,6 +583,7 @@
             });
 
             let remainingCash = cashInput - totalCost;
+
             document.getElementById('calcTotalCost').innerText = `₩${Math.round(totalCost).toLocaleString()}`;
             let cashUI = document.getElementById('calcRemainingCash');
             cashUI.innerText = `₩${Math.round(remainingCash).toLocaleString()}`;
@@ -683,8 +672,11 @@
         async function loadDividendHistoryData() {
             try {
                 const res = await fetch(DIVIDEND_CSV_URL);
+                if (!res.ok) throw new Error("CORS or Network error");
                 const matrix = parseCsvToMatrix(await res.text());
+                
                 let stockGroupedLogs = {}; 
+                let logs = [];
 
                 for(let i = 1; i < matrix.length; i++) {
                     if(matrix[i].length < 3) continue;
@@ -693,10 +685,12 @@
                     let amount = parseFloat(String(matrix[i][2]).replace(/,/g, '')) || 0;
 
                     if(!stockName || stockName === "종목" || isNaN(amount)) continue;
-                    if(stockName.includes("미국반도체")) stockName = "KODEX 미국반도체";
+                    if(stockName.includes("미국반до체")) stockName = "KODEX 미국반도체";
 
                     if(!stockGroupedLogs[stockName]) stockGroupedLogs[stockName] = [];
                     stockGroupedLogs[stockName].push({ date, amount });
+
+                    logs.push({ stockName, date, amount });
                 }
 
                 let finalStrategyMap = {};
@@ -726,29 +720,38 @@
                     } else if (history.length > 0) {
                         baseValue = history.reduce((acc, cur) => acc + cur.amount, 0) / history.length;
                     }
+
                     finalStrategyMap[exactStockName] = baseValue;
                 }
                 globalCalculatedStrategyDividends = finalStrategyMap;
                 initDividendUserSelector();
-            } catch (e) { console.error("배당 역사 로드 에러:", e); }
+            } catch (e) { console.error("배당 로드 에러:", e); }
         }
 
+        // 🌟 [신규 파싱 엔진] 4번 시트 A~E열 완벽 매핑
         async function loadActualDividendData() {
             try {
                 const res = await fetch(ACTUAL_DIV_CSV_URL);
+                if (!res.ok) throw new Error("CORS error on Actual Dividend");
                 const matrix = parseCsvToMatrix(await res.text());
+
                 let logs = [];
                 for(let i=1; i<matrix.length; i++) {
-                    if(matrix[i].length < 5) continue;
-                    let userName = matrix[i][0].trim();      
-                    let date = matrix[i][1].trim();          
-                    let stockName = matrix[i][2].trim();     
-                    let qty = parseFloat(String(matrix[i][3]).replace(/,/g, '')) || 0; 
-                    let amount = parseFloat(String(matrix[i][4]).replace(/,/g, '')) || 0; 
+                    if(matrix[i].length < 5) continue; // A~E열 필수 확인
+                    
+                    let userName = matrix[i][0].trim();      // A열: 이름
+                    let date = matrix[i][1].trim();          // B열: 수령일자
+                    let stockName = matrix[i][2].trim();     // C열: 종목명
+                    let qty = parseFloat(String(matrix[i][3]).replace(/,/g, '')) || 0; // D열: 당시수량
+                    let amount = parseFloat(String(matrix[i][4]).replace(/,/g, '')) || 0; // E열: 실수령액
+                    
                     logs.push({ userName, date, stockName, qty, amount });
                 }
                 globalActualDividendLogs = logs;
-                calculateExpectedDividends();
+                
+                if(document.getElementById('divUserSelector')) {
+                    calculateExpectedDividends();
+                }
             } catch(e) { console.error("실수령 시트 로드 에러:", e); }
         }
 
@@ -759,6 +762,7 @@
                 selector.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
                 selector.addEventListener('change', calculateExpectedDividends);
             }
+            calculateExpectedDividends();
         }
 
         function calculateExpectedDividends() {
@@ -766,11 +770,13 @@
             const userObj = globalParsedUsers[targetUser];
             if(!userObj) return;
 
+            // 1. 실수령액 합산 및 다이어리 테이블 동적 렌더링
             let totalReceived = 0;
             let actualLogsHtml = "";
             let sortedActualLogs = [...globalActualDividendLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
 
             sortedActualLogs.forEach(log => {
+                // A열의 이름이 정확히 선택된 사람과 일치할 때만 연산
                 if (log.userName === targetUser) {
                     totalReceived += log.amount;
                     actualLogsHtml += `
@@ -790,12 +796,14 @@
             document.getElementById("actual-received-dividend").innerText = `₩${Math.round(totalReceived).toLocaleString()}`;
             document.getElementById("actual-dividend-table-body").innerHTML = actualLogsHtml || `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-bold">아직 기입된 통장 입금 내역이 없습니다.</td></tr>`;
 
+            // 2. 미래 예상 배당금 계산 로직
             let totalAnnualDividend = 0;
             let breakdownHtml = "";
             let monthlyCalendar = new Array(12).fill(0); 
 
             userObj.items.forEach(item => {
                 if(item.qty <= 0) return;
+                
                 let baseDividend1Time = 0;
                 let payMonths = [1,2,3,4,5,6,7,8,9,10,11,12]; 
                 let strategyText = "기본연산";
@@ -823,6 +831,7 @@
                 }
 
                 let singlePaymentTotal = item.qty * baseDividend1Time;
+                
                 payMonths.forEach(monthNum => {
                     monthlyCalendar[monthNum - 1] += singlePaymentTotal; 
                     totalAnnualDividend += singlePaymentTotal; 
@@ -857,6 +866,7 @@
 
             let currentMonth = new Date().getMonth() + 1; 
             let calendarHtml = "";
+            
             for (let m = currentMonth; m <= 12; m++) {
                 let amount = monthlyCalendar[m - 1];
                 let monthStr = `${m}월`;
